@@ -15,6 +15,7 @@ solution (proj_name)
       language "C++"
       location (project_dir)
       targetdir (project_dir .. "/bin/")
+      buildoptions("-std=c++11", "-LD_LIBRARY_PATH=" .. project_dir .. "/dependencies/SFML/lib")
       
       includedirs { 
         project_dir .. "include", 
@@ -24,7 +25,7 @@ solution (proj_name)
       
       libdirs {
         project_dir .. "/dependencies/SFML/lib", 
-        project_dir .. "/dependencies/SFML/bin"
+        --project_dir .. "/dependencies/SFML/bin"
       }
       
       files{ group = "include", project_dir .. "/include/**.h" } -- include filter and get the files
@@ -42,7 +43,7 @@ solution (proj_name)
           "sfml-network-d",
         }
 
-      configuration "Release"
+      configuration "release"
         defines { "NDEBUG" }
         flags { "Optimize", "ExtraWarnings" }
         links {
