@@ -9,10 +9,12 @@
 *.sln.docstates
 *.vcxproj
 *.vcxproj.filters
+*.sh
 
 *.bat
 genie.exe
 #project_settings.lua
+Makefile
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs

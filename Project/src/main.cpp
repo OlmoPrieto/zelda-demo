@@ -23,6 +23,10 @@ int main()
     // [INPUT]
     sf::Keyboard::Key eKey;
 
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Escape))
+    {
+      cWindow.close();
+    }
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up))
     {
       eKey = sf::Keyboard::Key::Up;
