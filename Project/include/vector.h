@@ -1,4 +1,7 @@
-#include <iostream>
+#ifndef __VECTOR_H__
+#define __VECTOR_H__
+
+//#include <iostream>
 #include <memory>
 #include <cmath>
 #include <cstring>
@@ -6,6 +9,8 @@
 typedef unsigned int uint32;
 typedef unsigned char byte;
 
+namespace elm
+{
 template <class T>
 class vector
 {
@@ -162,7 +167,7 @@ public:
       return operator[](index);
     } else
     {
-      printf("Index out of range in vector\n");
+      //printf("Index out of range in vector\n");
       return T();
     }
   }
@@ -234,3 +239,6 @@ private:
   uint32 m_uCount;
   uint32 m_uCapacity;
 };
+} // elm namespace
+
+#endif // __VECTOR_H__

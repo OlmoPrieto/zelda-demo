@@ -5,12 +5,15 @@
 #include <cstdio>
 
 
-Link::Link()
+Link::Link() : m_cIdleDownAnimation(&m_cSprite, 0.15f, false)
 {
+  m_fNoInputTime = 0.0f;
+  m_cCurrentAnimation = nullptr;
+  m_cChrono.start();
+
   sf::Image cLinkSheet;
   bool opened = cLinkSheet.loadFromFile("resources/link_sheet.png");
 
-  
   sf::IntRect cUpSpriteRect(79, 10, 18, 23);  // x y w h
   m_cLinkUpTexture.loadFromImage(cLinkSheet, cUpSpriteRect);
 
@@ -46,7 +49,37 @@ Link::Link()
 
   Utils::flipTexture(&m_cLinkLeftTexture, &m_cLinkRightTexture);
 
-  m_cSprite.setTexture(m_cLinkDownTexture);
+  // This is redundant. TODO: use above variables (the image is already loaded)
+  sf::IntRect cTextureRect;
+  sf::Texture cFrame;
+
+  cTextureRect.left = 15;
+  cTextureRect.top = 9;
+  cTextureRect.width = 18;
+  cTextureRect.height = 23;
+  cFrame.loadFromFile("resources/link_sheet.png", cTextureRect);
+  m_cIdleDownAnimation.addFrame(cFrame);
+
+  cTextureRect.left = 15;
+  cTextureRect.top = 45;
+  cTextureRect.width = 18;
+  cTextureRect.height = 23;
+  cFrame.loadFromFile("resources/link_sheet.png", cTextureRect);
+  m_cIdleDownAnimation.addFrame(cFrame);
+
+  cTextureRect.left = 43;
+  cTextureRect.top = 45;
+  cTextureRect.width = 18;
+  cTextureRect.height = 23;
+  cFrame.loadFromFile("resources/link_sheet.png", cTextureRect);
+  m_cIdleDownAnimation.addFrame(cFrame);
+
+  m_cCurrentAnimation = &m_cIdleDownAnimation;
+  m_cSprite.setTexture(*m_cCurrentAnimation->getCurrentFrame());
+  m_cCurrentAnimation->play();
+  //
+
+  //m_cSprite.setTexture(m_cLinkDownTexture);
   m_cSprite.setPosition(100.0f, 100.0f);
   m_cSprite.setScale(10.0f, 10.0f);
 }
@@ -63,6 +96,8 @@ sf::Sprite* Link::getSprite()
 
 void Link::processInput(const sf::Keyboard::Key &eKey)
 {
+  bool bIsInput = true;
+
   if (eKey == sf::Keyboard::Key::Up)
   {
     m_cSprite.setTexture(m_cLinkUpTexture);
@@ -75,5 +110,30 @@ void Link::processInput(const sf::Keyboard::Key &eKey)
   } else if (eKey == sf::Keyboard::Key::Right)
   {
     m_cSprite.setTexture(m_cLinkRightTexture);
+  } else if (eKey == sf::Keyboard::Key::Unknown)
+  {
+    bIsInput = false;
+  }
+
+  if (bIsInput == false)
+  {
+    m_cChrono.stop();
+    static float sfCurrentTime = m_fNoInputTime;
+    m_fNoInputTime += m_cChrono.timeAsSeconds() - sfCurrentTime;
+    m_cChrono.start();
+  } else // if it was useful input, reset the chrono
+  {
+    m_cChrono.start();
+  }
+}
+
+void Link::update(float fDeltaTime)
+{
+  m_cCurrentAnimation->update(fDeltaTime);
+
+  if (m_fNoInputTime >= 3.0f)
+  {
+    m_fNoInputTime = 0.0f;
+    m_cCurrentAnimation->play();
   }
 }

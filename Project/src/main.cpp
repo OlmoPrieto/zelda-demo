@@ -21,7 +21,7 @@ int main()
       }
     }
     // [INPUT]
-    sf::Keyboard::Key eKey;
+    sf::Keyboard::Key eKey = sf::Keyboard::Key::Unknown;
 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Escape))
     {
@@ -47,6 +47,9 @@ int main()
     cLink.processInput(eKey);
     // [INPUT]
 
+    // [UPDATE]
+    cLink.update(0.16f);
+    // [UPDATE]
 
     // [DRAW]
     cWindow.clear(sf::Color(64, 64, 64, 255));
