@@ -24,9 +24,9 @@ public:
 
   void update(float fDeltaTime);
 
-  void addFrame(const sf::Texture &cNewFrame);
+  void addFrame(const sf::IntRect &cNewFrameRect);
 
-  sf::Texture* getCurrentFrame();
+  sf::IntRect* getCurrentFrame();
 
 private:
   Animation() {}
@@ -34,12 +34,13 @@ private:
   bool m_bPaused;
   bool m_bStopped;
   bool m_bLooped;
+  bool m_bIsStaticAnimation;
   byte m_byFrameIndex;  // 255 frames max
   float m_fElapsedTime;
   float m_fFrameTime;
   sf::Sprite* m_pTargetSprite;  // the sprite where the animation is going to be drawn at
   Chrono m_cChrono;
-  std::vector<sf::Texture> m_vFramesTextures;
+  std::vector<sf::IntRect> m_vFramesRects;
 };
 
 #endif // __ANIMATION_H__

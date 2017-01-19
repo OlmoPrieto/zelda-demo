@@ -1,6 +1,8 @@
 #ifndef __LINK_H__
 #define __LINK_H__
 
+#include <unordered_map>
+
 #include <SFML/Graphics.hpp>
 
 #include "animation.h"
@@ -12,6 +14,11 @@ public:
   Link();
   ~Link();
 
+  enum FacingDirection
+  {
+    Up, Left, Down, Right
+  };
+
   sf::Sprite* getSprite();
 
   void processInput(const sf::Keyboard::Key &eKey);
@@ -19,14 +26,18 @@ public:
 
 private:
   float m_fNoInputTime;
-  Animation* m_cCurrentAnimation;
+  FacingDirection m_eFacingDirection;
+  Animation* m_pCurrentAnimation;
+  Animation m_cStandingUpAnimation;
+  Animation m_cStandingLeftAnimation;
+  Animation m_cStandingDownAnimation;
+  Animation m_cStandingRightAnimation;
+  Animation m_cIdleLeftAnimation;
   Animation m_cIdleDownAnimation;
+  Animation m_cIdleRightAnimation;
   Chrono m_cChrono;
   sf::Sprite m_cSprite;
-  sf::Texture m_cLinkUpTexture;
-  sf::Texture m_cLinkLeftTexture;
-  sf::Texture m_cLinkDownTexture;
-  sf::Texture m_cLinkRightTexture;
+  sf::Texture m_cSpriteSheetTexture;
 };
 
 #endif // __LINK_H__

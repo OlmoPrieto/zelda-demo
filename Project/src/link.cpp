@@ -5,78 +5,117 @@
 #include <cstdio>
 
 
-Link::Link() : m_cIdleDownAnimation(&m_cSprite, 0.15f, false)
+Link::Link() : m_cStandingUpAnimation(&m_cSprite, 0.15f, false),
+  m_cStandingLeftAnimation(&m_cSprite, 0.15f, false),
+  m_cStandingDownAnimation(&m_cSprite, 0.15f, false),
+  m_cStandingRightAnimation(&m_cSprite, 0.15f, false),
+  m_cIdleDownAnimation(&m_cSprite, 0.15f, false),
+  m_cIdleLeftAnimation(&m_cSprite, 0.15f, false),
+  m_cIdleRightAnimation(&m_cSprite, 0.15f, false)
 {
   m_fNoInputTime = 0.0f;
-  m_cCurrentAnimation = nullptr;
+  m_eFacingDirection = FacingDirection::Down;
+  m_pCurrentAnimation = nullptr;
   m_cChrono.start();
 
   sf::Image cLinkSheet;
   bool opened = cLinkSheet.loadFromFile("resources/link_sheet.png");
 
-  sf::IntRect cUpSpriteRect(79, 10, 18, 23);  // x y w h
-  m_cLinkUpTexture.loadFromImage(cLinkSheet, cUpSpriteRect);
-
-  sf::IntRect cLeftSpriteRect(51, 10, 18, 23);  // x y w h
-  m_cLinkLeftTexture.loadFromImage(cLinkSheet, cLeftSpriteRect);
-
-  sf::IntRect cDownSpriteRect(15, 9, 18, 23);  // x y w h
-  m_cLinkDownTexture.loadFromImage(cLinkSheet, cDownSpriteRect);
-  
-  // manually flip left texture
-  //sf::Vector2u cLeftTextureSize = m_cLinkLeftTexture.getSize();
-  //sf::Image cLeftTextureImage = m_cLinkLeftTexture.copyToImage();
-  //const byte* pPixelPointer = cLeftTextureImage.getPixelsPtr();
-  //byte* pNewTextureArray = (byte*)malloc(cLeftTextureSize.x * 
-  //  cLeftTextureSize.y * 4);
-  //for (unsigned int i = 0; i < cLeftTextureSize.y; i++)
-  //{
-  //  for (unsigned int j = 0, k = cLeftTextureSize.x - 1; 
-  //    j < cLeftTextureSize.x; j++, k--)
-  //  { // the copy pointer starts on 0 and the original starts on the rightmost pixel
-  //    int iOriginalPtr = (k + i * cLeftTextureSize.x) * 4;
-  //    int iNewPtr = (j + i * cLeftTextureSize.x) * 4;  // ptr to each color
-  //    
-  //    pNewTextureArray[iNewPtr + 0] = pPixelPointer[iOriginalPtr + 0];
-  //    pNewTextureArray[iNewPtr + 1] = pPixelPointer[iOriginalPtr + 1];
-  //    pNewTextureArray[iNewPtr + 2] = pPixelPointer[iOriginalPtr + 2];
-  //    pNewTextureArray[iNewPtr + 3] = pPixelPointer[iOriginalPtr + 3];
-  //  }
-  //}
-  //m_cLinkRightTexture.create(cLeftTextureSize.x, cLeftTextureSize.y);
-  //m_cLinkRightTexture.update(pNewTextureArray);
-  //free(pNewTextureArray);
-
-  Utils::flipTexture(&m_cLinkLeftTexture, &m_cLinkRightTexture);
-
-  // This is redundant. TODO: use above variables (the image is already loaded)
+  m_cSpriteSheetTexture.loadFromImage(cLinkSheet);
   sf::IntRect cTextureRect;
-  sf::Texture cFrame;
 
+  // Standing Up
+  cTextureRect.left = 79;
+  cTextureRect.top = 10;
+  cTextureRect.width = 18;
+  cTextureRect.height = 23;
+  m_cStandingUpAnimation.addFrame(cTextureRect);
+
+  // Standing Left
+  cTextureRect.left = 51;
+  cTextureRect.top = 10;
+  cTextureRect.width = 18;
+  cTextureRect.height = 23;
+  m_cStandingLeftAnimation.addFrame(cTextureRect);
+
+  // Standing Down
   cTextureRect.left = 15;
   cTextureRect.top = 9;
   cTextureRect.width = 18;
   cTextureRect.height = 23;
-  cFrame.loadFromFile("resources/link_sheet.png", cTextureRect);
-  m_cIdleDownAnimation.addFrame(cFrame);
+  m_cStandingDownAnimation.addFrame(cTextureRect);
+
+  // Standing Right
+  cTextureRect.left = 110;
+  cTextureRect.top = 10;
+  cTextureRect.width = 18;
+  cTextureRect.height = 23;
+  m_cStandingRightAnimation.addFrame(cTextureRect);
+
+  // Idle Down
+  cTextureRect.left = 15;
+  cTextureRect.top = 9;
+  cTextureRect.width = 18;
+  cTextureRect.height = 23;
+  m_cIdleDownAnimation.addFrame(cTextureRect);
 
   cTextureRect.left = 15;
   cTextureRect.top = 45;
   cTextureRect.width = 18;
   cTextureRect.height = 23;
-  cFrame.loadFromFile("resources/link_sheet.png", cTextureRect);
-  m_cIdleDownAnimation.addFrame(cFrame);
+  m_cIdleDownAnimation.addFrame(cTextureRect);
 
   cTextureRect.left = 43;
   cTextureRect.top = 45;
   cTextureRect.width = 18;
   cTextureRect.height = 23;
-  cFrame.loadFromFile("resources/link_sheet.png", cTextureRect);
-  m_cIdleDownAnimation.addFrame(cFrame);
+  m_cIdleDownAnimation.addFrame(cTextureRect);
+  // -- 
 
-  m_cCurrentAnimation = &m_cIdleDownAnimation;
-  m_cSprite.setTexture(*m_cCurrentAnimation->getCurrentFrame());
-  m_cCurrentAnimation->play();
+  // Idle Left
+  cTextureRect.left = 51;
+  cTextureRect.top = 10;
+  cTextureRect.width = 18;
+  cTextureRect.height = 23;
+  m_cIdleLeftAnimation.addFrame(cTextureRect);
+
+  cTextureRect.left = 79;
+  cTextureRect.top = 46;
+  cTextureRect.width = 18;
+  cTextureRect.height = 23;
+  m_cIdleLeftAnimation.addFrame(cTextureRect);
+
+  cTextureRect.left = 103;
+  cTextureRect.top = 46;
+  cTextureRect.width = 18;
+  cTextureRect.height = 23;
+  m_cIdleLeftAnimation.addFrame(cTextureRect);
+  // --
+
+  // Idle Right
+  cTextureRect.left = 110;
+  cTextureRect.top = 10;
+  cTextureRect.width = 18;
+  cTextureRect.height = 23;
+  m_cIdleRightAnimation.addFrame(cTextureRect);
+
+  cTextureRect.left = 143;
+  cTextureRect.top = 46;
+  cTextureRect.width = 18;
+  cTextureRect.height = 23;
+  m_cIdleRightAnimation.addFrame(cTextureRect);
+
+  cTextureRect.left = 167;
+  cTextureRect.top = 46;
+  cTextureRect.width = 18;
+  cTextureRect.height = 23;
+  m_cIdleRightAnimation.addFrame(cTextureRect);
+  // --
+
+  m_pCurrentAnimation = &m_cIdleDownAnimation;
+  //m_cSprite.setTextureRect(*m_cCurrentAnimation->getCurrentFrame());
+  m_cSprite.setTexture(m_cSpriteSheetTexture);
+  m_pCurrentAnimation->play();
   //
 
   //m_cSprite.setTexture(m_cLinkDownTexture);
@@ -100,16 +139,20 @@ void Link::processInput(const sf::Keyboard::Key &eKey)
 
   if (eKey == sf::Keyboard::Key::Up)
   {
-    m_cSprite.setTexture(m_cLinkUpTexture);
+    m_eFacingDirection = Up;
+    m_pCurrentAnimation = &m_cStandingUpAnimation;
   } else if (eKey == sf::Keyboard::Key::Left)
   {
-    m_cSprite.setTexture(m_cLinkLeftTexture);
+    m_eFacingDirection = Left;
+    m_pCurrentAnimation = &m_cStandingLeftAnimation;
   } else if (eKey == sf::Keyboard::Key::Down)
   {
-    m_cSprite.setTexture(m_cLinkDownTexture);
+    m_eFacingDirection = Down;
+    m_pCurrentAnimation = &m_cStandingDownAnimation;
   } else if (eKey == sf::Keyboard::Key::Right)
   {
-    m_cSprite.setTexture(m_cLinkRightTexture);
+    m_eFacingDirection = Right;
+    m_pCurrentAnimation = &m_cStandingRightAnimation;
   } else if (eKey == sf::Keyboard::Key::Unknown)
   {
     bIsInput = false;
@@ -124,16 +167,43 @@ void Link::processInput(const sf::Keyboard::Key &eKey)
   } else // if it was useful input, reset the chrono
   {
     m_cChrono.start();
+    m_fNoInputTime = 0.0;
   }
 }
 
 void Link::update(float fDeltaTime)
 {
-  m_cCurrentAnimation->update(fDeltaTime);
+  m_pCurrentAnimation->update(fDeltaTime);
 
   if (m_fNoInputTime >= 3.0f)
   {
     m_fNoInputTime = 0.0f;
-    m_cCurrentAnimation->play();
+    m_pCurrentAnimation->stop();
+
+    switch (m_eFacingDirection)
+    {
+    case Up:
+    {
+      m_pCurrentAnimation = &m_cStandingUpAnimation;
+      break;
+    }
+    case Left:
+    {
+      m_pCurrentAnimation = &m_cIdleLeftAnimation;
+      break;
+    }
+    case Down:
+    {
+      m_pCurrentAnimation = &m_cIdleDownAnimation;
+      break;
+    }
+    case Right:
+    {
+      m_pCurrentAnimation = &m_cIdleRightAnimation;
+      break;
+    }
+    }
+
+    m_pCurrentAnimation->play();
   }
 }

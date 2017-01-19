@@ -1,8 +1,16 @@
 #include <iostream>
+#include <vector>
 
 #include <SFML/Graphics.hpp>
 
 #include "link.h"
+
+struct vertices {
+  int x;
+  int y;
+  int w;
+  int h;
+};
 
 int main()
 {
@@ -43,7 +51,7 @@ int main()
     {
       eKey = sf::Keyboard::Key::Right;
     }
-
+    
     cLink.processInput(eKey);
     // [INPUT]
 
