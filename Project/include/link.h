@@ -35,7 +35,10 @@ private:
   Animation m_cIdleLeftAnimation;
   Animation m_cIdleDownAnimation;
   Animation m_cIdleRightAnimation;
+  Animation m_cWalkUpAnimation;
+  Animation m_cWalkLeftAnimation;
   Animation m_cWalkDownAnimation;
+  Animation m_cWalkRightAnimation;
   Chrono m_cChrono;
   sf::Sprite m_cSprite;
   sf::Texture m_cSpriteSheetTexture;

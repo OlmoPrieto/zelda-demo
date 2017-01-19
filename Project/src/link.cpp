@@ -12,7 +12,10 @@ Link::Link() : m_cStandingUpAnimation(&m_cSprite, 0.15f, false),
   m_cIdleDownAnimation(&m_cSprite, 0.15f, false),
   m_cIdleLeftAnimation(&m_cSprite, 0.15f, false),
   m_cIdleRightAnimation(&m_cSprite, 0.15f, false),
-  m_cWalkDownAnimation(&m_cSprite, 0.07f, true)
+  m_cWalkUpAnimation(&m_cSprite, 0.07f, true),
+  m_cWalkLeftAnimation(&m_cSprite, 0.07f, true),
+  m_cWalkDownAnimation(&m_cSprite, 0.07f, true),
+  m_cWalkRightAnimation(&m_cSprite, 0.07f, true)
 {
   m_fNoInputTime = 0.0f;
   m_eFacingDirection = FacingDirection::Down;
@@ -114,6 +117,142 @@ Link::Link() : m_cStandingUpAnimation(&m_cSprite, 0.15f, false),
   m_cIdleRightAnimation.addFrame(cTextureRect);
   // --
 
+  // Walk Up
+  cTextureRect.left = 79;
+  cTextureRect.top = 10;
+  cTextureRect.width = 18;
+  cTextureRect.height = 23;
+  m_cWalkUpAnimation.addFrame(cTextureRect);
+
+  cTextureRect.left = 683;
+  cTextureRect.top = 78;
+  cTextureRect.width = 18;
+  cTextureRect.height = 22;
+  m_cWalkUpAnimation.addFrame(cTextureRect);
+
+  cTextureRect.left = 715;
+  cTextureRect.top = 78;
+  cTextureRect.width = 18;
+  cTextureRect.height = 22;
+  m_cWalkUpAnimation.addFrame(cTextureRect);
+
+  cTextureRect.left = 747;
+  cTextureRect.top = 76;
+  cTextureRect.width = 18;
+  cTextureRect.height = 24;
+  m_cWalkUpAnimation.addFrame(cTextureRect);
+
+  cTextureRect.left = 779;
+  cTextureRect.top = 76;
+  cTextureRect.width = 18;
+  cTextureRect.height = 25;
+  m_cWalkUpAnimation.addFrame(cTextureRect);
+
+  cTextureRect.left = 811;
+  cTextureRect.top = 76;
+  cTextureRect.width = 18;
+  cTextureRect.height = 24;
+  m_cWalkUpAnimation.addFrame(cTextureRect);
+
+  cTextureRect.left = 843;
+  cTextureRect.top = 78;
+  cTextureRect.width = 18;
+  cTextureRect.height = 22;
+  m_cWalkUpAnimation.addFrame(cTextureRect);
+
+  cTextureRect.left = 875;
+  cTextureRect.top = 78;
+  cTextureRect.width = 18;
+  cTextureRect.height = 22;
+  m_cWalkUpAnimation.addFrame(cTextureRect);
+
+  cTextureRect.left = 907;
+  cTextureRect.top = 76;
+  cTextureRect.width = 18;
+  cTextureRect.height = 24;
+  m_cWalkUpAnimation.addFrame(cTextureRect);
+
+  cTextureRect.left = 939;
+  cTextureRect.top = 77;
+  cTextureRect.width = 18;
+  cTextureRect.height = 25;
+  m_cWalkUpAnimation.addFrame(cTextureRect);
+
+  cTextureRect.left = 971;
+  cTextureRect.top = 76;
+  cTextureRect.width = 18;
+  cTextureRect.height = 24;
+  m_cWalkUpAnimation.addFrame(cTextureRect);
+  // -- 
+
+  // Walk Left
+  //cTextureRect.left = 51;   // 0
+  //cTextureRect.top = 10;
+  //cTextureRect.width = 18;
+  //cTextureRect.height = 23;
+  //m_cWalkLeftAnimation.addFrame(cTextureRect);
+
+  cTextureRect.left = 476;  // 5
+  cTextureRect.top = 77;
+  cTextureRect.width = 20;
+  cTextureRect.height = 22;
+  m_cWalkLeftAnimation.addFrame(cTextureRect);
+
+  cTextureRect.left = 445;  // 4
+  cTextureRect.top = 77;
+  cTextureRect.width = 20;
+  cTextureRect.height = 22;
+  m_cWalkLeftAnimation.addFrame(cTextureRect);
+
+  cTextureRect.left = 412;  // 3
+  cTextureRect.top = 77;
+  cTextureRect.width = 20;
+  cTextureRect.height = 21;
+  m_cWalkLeftAnimation.addFrame(cTextureRect);
+
+  cTextureRect.left = 380;  // 2
+  cTextureRect.top = 78;
+  cTextureRect.width = 20;
+  cTextureRect.height = 21;
+  m_cWalkLeftAnimation.addFrame(cTextureRect);
+
+  cTextureRect.left = 350;  // 1
+  cTextureRect.top = 78;
+  cTextureRect.width = 23;
+  cTextureRect.height = 22;
+  m_cWalkLeftAnimation.addFrame(cTextureRect);
+
+  cTextureRect.left = 510;
+  cTextureRect.top = 78;
+  cTextureRect.width = 23;
+  cTextureRect.height = 22;
+  m_cWalkLeftAnimation.addFrame(cTextureRect);
+
+  cTextureRect.left = 540;
+  cTextureRect.top = 78;
+  cTextureRect.width = 19;
+  cTextureRect.height = 22;
+  m_cWalkLeftAnimation.addFrame(cTextureRect);
+
+  cTextureRect.left = 573;
+  cTextureRect.top = 77;
+  cTextureRect.width = 19;
+  cTextureRect.height = 22;
+  m_cWalkLeftAnimation.addFrame(cTextureRect);
+
+  cTextureRect.left = 609;
+  cTextureRect.top = 77;
+  cTextureRect.width = 19;
+  cTextureRect.height = 22;
+  m_cWalkLeftAnimation.addFrame(cTextureRect);
+
+  cTextureRect.left = 636;
+  cTextureRect.top = 77;
+  cTextureRect.width = 20;
+  cTextureRect.height = 22;
+  m_cWalkLeftAnimation.addFrame(cTextureRect);
+  // --
+
   // Walk Down
   cTextureRect.left = 15;
   cTextureRect.top = 9;
@@ -136,19 +275,19 @@ Link::Link() : m_cStandingUpAnimation(&m_cSprite, 0.15f, false),
   cTextureRect.left = 79;
   cTextureRect.top = 76;
   cTextureRect.width = 18;
-  cTextureRect.height = 23;
+  cTextureRect.height = 24;
   m_cWalkDownAnimation.addFrame(cTextureRect);
 
   cTextureRect.left = 111;
   cTextureRect.top = 76;
   cTextureRect.width = 18;
-  cTextureRect.height = 23;
+  cTextureRect.height = 24;
   m_cWalkDownAnimation.addFrame(cTextureRect);
 
   cTextureRect.left = 143;
   cTextureRect.top = 76;
   cTextureRect.width = 18;
-  cTextureRect.height = 23;
+  cTextureRect.height = 24;
   m_cWalkDownAnimation.addFrame(cTextureRect);
 
   cTextureRect.left = 175;
@@ -166,20 +305,88 @@ Link::Link() : m_cStandingUpAnimation(&m_cSprite, 0.15f, false),
   cTextureRect.left = 239;
   cTextureRect.top = 76;
   cTextureRect.width = 18;
-  cTextureRect.height = 23;
+  cTextureRect.height = 24;
   m_cWalkDownAnimation.addFrame(cTextureRect);
 
   cTextureRect.left = 271;
   cTextureRect.top = 76;
   cTextureRect.width = 18;
-  cTextureRect.height = 23;
+  cTextureRect.height = 24;
   m_cWalkDownAnimation.addFrame(cTextureRect);
 
   cTextureRect.left = 303;
   cTextureRect.top = 76;
   cTextureRect.width = 18;
-  cTextureRect.height = 23;
+  cTextureRect.height = 24;
   m_cWalkDownAnimation.addFrame(cTextureRect);
+  // -- 
+
+  // Walk Right
+  //cTextureRect.left = 110;  // 0
+  //cTextureRect.top = 10;
+  //cTextureRect.width = 18;
+  //cTextureRect.height = 23;
+  //m_cWalkRightAnimation.addFrame(cTextureRect);
+
+  cTextureRect.left = 999;  // 5
+  cTextureRect.top = 44;
+  cTextureRect.width = 23;
+  cTextureRect.height = 22;
+  m_cWalkRightAnimation.addFrame(cTextureRect);
+
+  cTextureRect.left = 973;  // 4
+  cTextureRect.top = 44;
+  cTextureRect.width = 19;
+  cTextureRect.height = 22;
+  m_cWalkRightAnimation.addFrame(cTextureRect);
+
+  cTextureRect.left = 940;  // 3
+  cTextureRect.top = 43;
+  cTextureRect.width = 19;
+  cTextureRect.height = 22;
+  m_cWalkRightAnimation.addFrame(cTextureRect);
+
+  cTextureRect.left = 904;  // 2
+  cTextureRect.top = 43;
+  cTextureRect.width = 19;
+  cTextureRect.height = 22;
+  m_cWalkRightAnimation.addFrame(cTextureRect);
+
+  cTextureRect.left = 876;  // 1
+  cTextureRect.top = 43;
+  cTextureRect.width = 20;
+  cTextureRect.height = 22;
+  m_cWalkRightAnimation.addFrame(cTextureRect);
+
+  cTextureRect.left = 1036;
+  cTextureRect.top = 43;
+  cTextureRect.width = 20;
+  cTextureRect.height = 22;
+  m_cWalkRightAnimation.addFrame(cTextureRect);
+
+  cTextureRect.left = 1067;
+  cTextureRect.top = 43;
+  cTextureRect.width = 20;
+  cTextureRect.height = 22;
+  m_cWalkRightAnimation.addFrame(cTextureRect);
+
+  cTextureRect.left = 1100;
+  cTextureRect.top = 43;
+  cTextureRect.width = 20;
+  cTextureRect.height = 21;
+  m_cWalkRightAnimation.addFrame(cTextureRect);
+
+  cTextureRect.left = 1132;
+  cTextureRect.top = 44;
+  cTextureRect.width = 20;
+  cTextureRect.height = 21;
+  m_cWalkRightAnimation.addFrame(cTextureRect);
+
+  cTextureRect.left = 1159;
+  cTextureRect.top = 44;
+  cTextureRect.width = 23;
+  cTextureRect.height = 22;
+  m_cWalkRightAnimation.addFrame(cTextureRect);
   // -- 
 
   m_pCurrentAnimation = &m_cStandingDownAnimation;
@@ -211,27 +418,38 @@ void Link::processInput(const sf::Keyboard::Key &eKey)
   if (eKey == sf::Keyboard::Key::Up)
   {
     m_eFacingDirection = Up;
-    m_pCurrentAnimation = &m_cStandingUpAnimation;
+    //m_pCurrentAnimation = &m_cStandingUpAnimation;
+    if (m_pCurrentAnimation != &m_cWalkUpAnimation)
+    {
+      m_pCurrentAnimation = &m_cWalkUpAnimation;
+      m_pCurrentAnimation->play();
+    }
   } else if (eKey == sf::Keyboard::Key::Left)
   {
     m_eFacingDirection = Left;
-    m_pCurrentAnimation = &m_cStandingLeftAnimation;
+    //m_pCurrentAnimation = &m_cStandingLeftAnimation;
+    if (m_pCurrentAnimation != &m_cWalkLeftAnimation)
+    {
+      m_pCurrentAnimation = &m_cWalkLeftAnimation;
+      m_pCurrentAnimation->play();
+    }
   } else if (eKey == sf::Keyboard::Key::Down)
   {
     m_eFacingDirection = Down;
-    //m_pCurrentAnimation = &m_cStandingDownAnimation;
     if (m_pCurrentAnimation != &m_cWalkDownAnimation)
     {
       m_pCurrentAnimation = &m_cWalkDownAnimation;
       m_pCurrentAnimation->play();
-    } else
-    {
-      
     }
   } else if (eKey == sf::Keyboard::Key::Right)
   {
     m_eFacingDirection = Right;
-    m_pCurrentAnimation = &m_cStandingRightAnimation;
+    //m_pCurrentAnimation = &m_cStandingRightAnimation;
+    if (m_pCurrentAnimation != &m_cWalkRightAnimation)
+    {
+      m_pCurrentAnimation = &m_cWalkRightAnimation;
+      m_pCurrentAnimation->play();
+    }
   } else if (eKey == sf::Keyboard::Key::Unknown)
   {
     bIsInput = false;
