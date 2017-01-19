@@ -22,6 +22,11 @@ uint32 Animation::framesCount() const
   return m_vFramesRects.size();
 }
 
+bool Animation::isPlaying() const
+{
+  return !(m_bPaused || m_bStopped);
+}
+
 void Animation::play()
 {
   m_cChrono.start();
@@ -38,6 +43,7 @@ void Animation::stop()
 {
   m_bStopped = true;
   m_byFrameIndex = 0;
+  m_pTargetSprite->setTextureRect(m_vFramesRects[0]);
 }
 
 void Animation::update(float fDeltaTime)

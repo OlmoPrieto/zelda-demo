@@ -11,11 +11,13 @@ Link::Link() : m_cStandingUpAnimation(&m_cSprite, 0.15f, false),
   m_cStandingRightAnimation(&m_cSprite, 0.15f, false),
   m_cIdleDownAnimation(&m_cSprite, 0.15f, false),
   m_cIdleLeftAnimation(&m_cSprite, 0.15f, false),
-  m_cIdleRightAnimation(&m_cSprite, 0.15f, false)
+  m_cIdleRightAnimation(&m_cSprite, 0.15f, false),
+  m_cWalkDownAnimation(&m_cSprite, 0.07f, true)
 {
   m_fNoInputTime = 0.0f;
   m_eFacingDirection = FacingDirection::Down;
   m_pCurrentAnimation = nullptr;
+  m_bStopped = true;
   m_cChrono.start();
 
   sf::Image cLinkSheet;
@@ -112,7 +114,75 @@ Link::Link() : m_cStandingUpAnimation(&m_cSprite, 0.15f, false),
   m_cIdleRightAnimation.addFrame(cTextureRect);
   // --
 
-  m_pCurrentAnimation = &m_cIdleDownAnimation;
+  // Walk Down
+  cTextureRect.left = 15;
+  cTextureRect.top = 9;
+  cTextureRect.width = 18;
+  cTextureRect.height = 23;
+  m_cWalkDownAnimation.addFrame(cTextureRect);
+
+  cTextureRect.left = 15;
+  cTextureRect.top = 77;
+  cTextureRect.width = 18;
+  cTextureRect.height = 23;
+  m_cWalkDownAnimation.addFrame(cTextureRect);
+
+  cTextureRect.left = 47;
+  cTextureRect.top = 76;
+  cTextureRect.width = 18;
+  cTextureRect.height = 23;
+  m_cWalkDownAnimation.addFrame(cTextureRect);
+
+  cTextureRect.left = 79;
+  cTextureRect.top = 76;
+  cTextureRect.width = 18;
+  cTextureRect.height = 23;
+  m_cWalkDownAnimation.addFrame(cTextureRect);
+
+  cTextureRect.left = 111;
+  cTextureRect.top = 76;
+  cTextureRect.width = 18;
+  cTextureRect.height = 23;
+  m_cWalkDownAnimation.addFrame(cTextureRect);
+
+  cTextureRect.left = 143;
+  cTextureRect.top = 76;
+  cTextureRect.width = 18;
+  cTextureRect.height = 23;
+  m_cWalkDownAnimation.addFrame(cTextureRect);
+
+  cTextureRect.left = 175;
+  cTextureRect.top = 77;
+  cTextureRect.width = 18;
+  cTextureRect.height = 23;
+  m_cWalkDownAnimation.addFrame(cTextureRect);
+
+  cTextureRect.left = 207;
+  cTextureRect.top = 76;
+  cTextureRect.width = 18;
+  cTextureRect.height = 23;
+  m_cWalkDownAnimation.addFrame(cTextureRect);
+
+  cTextureRect.left = 239;
+  cTextureRect.top = 76;
+  cTextureRect.width = 18;
+  cTextureRect.height = 23;
+  m_cWalkDownAnimation.addFrame(cTextureRect);
+
+  cTextureRect.left = 271;
+  cTextureRect.top = 76;
+  cTextureRect.width = 18;
+  cTextureRect.height = 23;
+  m_cWalkDownAnimation.addFrame(cTextureRect);
+
+  cTextureRect.left = 303;
+  cTextureRect.top = 76;
+  cTextureRect.width = 18;
+  cTextureRect.height = 23;
+  m_cWalkDownAnimation.addFrame(cTextureRect);
+  // -- 
+
+  m_pCurrentAnimation = &m_cStandingDownAnimation;
   //m_cSprite.setTextureRect(*m_cCurrentAnimation->getCurrentFrame());
   m_cSprite.setTexture(m_cSpriteSheetTexture);
   m_pCurrentAnimation->play();
@@ -136,6 +206,7 @@ sf::Sprite* Link::getSprite()
 void Link::processInput(const sf::Keyboard::Key &eKey)
 {
   bool bIsInput = true;
+  m_bStopped = false;
 
   if (eKey == sf::Keyboard::Key::Up)
   {
@@ -148,7 +219,15 @@ void Link::processInput(const sf::Keyboard::Key &eKey)
   } else if (eKey == sf::Keyboard::Key::Down)
   {
     m_eFacingDirection = Down;
-    m_pCurrentAnimation = &m_cStandingDownAnimation;
+    //m_pCurrentAnimation = &m_cStandingDownAnimation;
+    if (m_pCurrentAnimation != &m_cWalkDownAnimation)
+    {
+      m_pCurrentAnimation = &m_cWalkDownAnimation;
+      m_pCurrentAnimation->play();
+    } else
+    {
+      
+    }
   } else if (eKey == sf::Keyboard::Key::Right)
   {
     m_eFacingDirection = Right;
@@ -156,6 +235,7 @@ void Link::processInput(const sf::Keyboard::Key &eKey)
   } else if (eKey == sf::Keyboard::Key::Unknown)
   {
     bIsInput = false;
+    m_bStopped = true;
   }
 
   if (bIsInput == false)
@@ -173,37 +253,89 @@ void Link::processInput(const sf::Keyboard::Key &eKey)
 
 void Link::update(float fDeltaTime)
 {
+  bool bPlayIdleAnimation = false;
+  bool bChangedAnimation = false;
+  Animation* pLastAnimation = nullptr;
+
   m_pCurrentAnimation->update(fDeltaTime);
 
-  if (m_fNoInputTime >= 3.0f)
+  if (m_fNoInputTime >= 2.5f)
   {
     m_fNoInputTime = 0.0f;
-    m_pCurrentAnimation->stop();
+    bPlayIdleAnimation = true;
+  }
 
-    switch (m_eFacingDirection)
+  switch (m_eFacingDirection)
+  {
+  case Up:
+  {
+    if (bPlayIdleAnimation == true)
     {
-    case Up:
-    {
+      pLastAnimation = m_pCurrentAnimation;
       m_pCurrentAnimation = &m_cStandingUpAnimation;
-      break;
-    }
-    case Left:
+      bChangedAnimation = true;
+    } else if (m_bStopped == true)
     {
-      m_pCurrentAnimation = &m_cIdleLeftAnimation;
-      break;
-    }
-    case Down:
-    {
-      m_pCurrentAnimation = &m_cIdleDownAnimation;
-      break;
-    }
-    case Right:
-    {
-      m_pCurrentAnimation = &m_cIdleRightAnimation;
-      break;
-    }
+      pLastAnimation = m_pCurrentAnimation;
+      m_pCurrentAnimation = &m_cStandingUpAnimation;
+      bChangedAnimation = true;
     }
 
+    break;
+  }
+  case Left:
+  {
+    if (bPlayIdleAnimation == true)
+    {
+      pLastAnimation = m_pCurrentAnimation;
+      m_pCurrentAnimation = &m_cIdleLeftAnimation;
+      bChangedAnimation = true;
+    } else if (m_bStopped == true && m_cIdleLeftAnimation.isPlaying() == false)
+    {
+      pLastAnimation = m_pCurrentAnimation;
+      m_pCurrentAnimation = &m_cStandingLeftAnimation;
+      bChangedAnimation = true;
+    }
+
+    break;
+  }
+  case Down:
+  {
+    if (bPlayIdleAnimation == true)
+    {
+      pLastAnimation = m_pCurrentAnimation;
+      m_pCurrentAnimation = &m_cIdleDownAnimation;
+      bChangedAnimation = true;
+    } else if (m_bStopped == true && m_cIdleDownAnimation.isPlaying() == false)
+    {
+      pLastAnimation = m_pCurrentAnimation;
+      m_pCurrentAnimation = &m_cStandingDownAnimation;
+      bChangedAnimation = true;
+    }
+
+    break;
+  }
+  case Right:
+  {
+    if (bPlayIdleAnimation == true)
+    {
+      pLastAnimation = m_pCurrentAnimation;
+      m_pCurrentAnimation = &m_cIdleRightAnimation;
+      bChangedAnimation = true;
+    } else if (m_bStopped == true && m_cIdleRightAnimation.isPlaying() == false)
+    {
+      pLastAnimation = m_pCurrentAnimation;
+      m_pCurrentAnimation = &m_cStandingRightAnimation;
+      bChangedAnimation = true;
+    }
+
+    break;
+  }
+  } // switch()
+
+  if (bChangedAnimation == true)
+  {
+    pLastAnimation->stop();
     m_pCurrentAnimation->play();
   }
 }

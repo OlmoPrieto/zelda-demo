@@ -17,6 +17,7 @@ public:
   ~Animation();
 
   uint32 framesCount() const;
+  bool isPlaying() const;
 
   void play();
   void pause();

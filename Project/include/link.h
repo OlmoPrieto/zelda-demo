@@ -35,9 +35,11 @@ private:
   Animation m_cIdleLeftAnimation;
   Animation m_cIdleDownAnimation;
   Animation m_cIdleRightAnimation;
+  Animation m_cWalkDownAnimation;
   Chrono m_cChrono;
   sf::Sprite m_cSprite;
   sf::Texture m_cSpriteSheetTexture;
+  bool m_bStopped;
 };
 
 #endif // __LINK_H__
