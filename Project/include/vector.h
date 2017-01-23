@@ -73,7 +73,8 @@ public:
     }
 
     m_pIterator = m_pVectorBegin + m_uCount;
-    *m_pIterator = element;
+    //*m_pIterator = element;
+    memcpy(m_pIterator, &element, m_uClassSize);
     m_pIterator = nullptr;
     
     m_uCount++;

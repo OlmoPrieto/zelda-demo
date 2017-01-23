@@ -86,7 +86,7 @@ void Animation::update(float fDeltaTime)
 
 void Animation::addFrame(const sf::IntRect &cNewFrameRect)
 {
-  m_vFramesRects.push_back(cNewFrameRect);
+  m_vFramesRects.pushBack(cNewFrameRect);
   if (m_vFramesRects.size() == 1)
   {
     m_pTargetSprite->setTextureRect(m_vFramesRects[0]);

@@ -41,7 +41,7 @@ private:
   float m_fFrameTime;
   sf::Sprite* m_pTargetSprite;  // the sprite where the animation is going to be drawn at
   Chrono m_cChrono;
-  std::vector<sf::IntRect> m_vFramesRects;
+  elm::vector<sf::IntRect> m_vFramesRects;
 };
 
 #endif // __ANIMATION_H__
