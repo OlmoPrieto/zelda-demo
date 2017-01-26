@@ -68,7 +68,9 @@ public:
   {
     m_sPosition = sPosition;
     m_sSize = sSize;
-    
+    m_bPressed = false;
+    m_bCanBePressedAgain = true;
+
     if (m_cFont.loadFromFile("../../../Project/resources/arial.ttf") == false)
     {
       printf("Failed to load font\n");
@@ -76,7 +78,7 @@ public:
     m_cLabel.setFont(m_cFont);
     m_cLabel.setString(cLabel);
     m_cLabel.setCharacterSize(10);
-    m_cLabel.setPosition(sPosition.x + sSize.x * 0.1f, sPosition.y + sSize.y / 2.0f);
+    m_cLabel.setPosition(sPosition.x + sSize.x * 0.1f, sPosition.y + sSize.y / 4.0f);
     m_cLabel.setColor(sf::Color::Black);
 
     m_cBox.setSize(sf::Vector2f(sSize.x, sSize.y));
@@ -85,11 +87,40 @@ public:
 
   bool isClicked()
   {
-    if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left))
+    if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left) == true)
+    {
+      m_bPressed = true;
+
+      if (m_bCanBePressedAgain == true) 
+      {
+        m_bCanBePressedAgain = false;
+
+        Point sMousePos;
+        sMousePos.setPos(sf::Mouse::getPosition(cWindow));
+        if (sMousePos.x > m_sPosition.x && sMousePos.x < m_sPosition.x + m_sSize.x
+          && sMousePos.y > m_sPosition.y && sMousePos.y < m_sPosition.y + m_sSize.y)
+        {
+          printf("Yay\n");
+          return true;
+        } else
+        {
+          return false;
+        }
+      } else
+      {
+        //printf("Wuao\n");
+      }
+    } else
+    {
+      m_bPressed = false;
+      m_bCanBePressedAgain = true;
+      //printf("Nay\n");
+    }
+
+    /*if (m_bPressed == true)
     {
       Point sMousePos;
       sMousePos.setPos(sf::Mouse::getPosition(cWindow));
-
       if (sMousePos.x > m_sPosition.x && sMousePos.x < m_sPosition.x + m_sSize.x
         && sMousePos.y > m_sPosition.y && sMousePos.y < m_sPosition.y + m_sSize.y)
       {
@@ -98,7 +129,7 @@ public:
       {
         return false;
       }
-    }
+    }*/
 
     return false;
   }
@@ -114,6 +145,8 @@ public:
   sf::RectangleShape m_cBox;
   sf::Text m_cLabel;
   sf::Font m_cFont;
+  bool m_bPressed;
+  bool m_bCanBePressedAgain;
 };
 
 sf::Image cBackgroundImage;
@@ -206,11 +239,17 @@ int main()
 
     for (uint32 i = 0; i < vButtons.size(); i++)
     {
-      if (vButtons[i].isClicked())
+      if (vButtons[i].isClicked() == true)
       {
-        printf("WOOOOORKED!!\n");
+        /*int j;
+        j++;*/
       }
     }
+    /*if (cZoomButton.isClicked() == true)
+    {
+      int i;
+      i++;
+    }*/
     // [INPUT]
 
 
@@ -232,9 +271,8 @@ int main()
 
     for (uint32 i = 0; i < vButtons.size(); i++)
     {
-      //vButtons[i].draw(&cWindow);
+      vButtons[i].draw(&cWindow);
     }
-    cZoomButton.draw(&cWindow);
     cWindow.display();
     // [DRAW]
   }

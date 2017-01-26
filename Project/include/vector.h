@@ -151,11 +151,13 @@ public:
    *  Note: Because it return an object, it has to be destroyed
    *  locally when exiting the function
   */
-  T operator[](uint32 index) const
+  T& operator[](uint32 index) const
   {
-    T* p = m_pVectorBegin + (index);// * m_uClassSize);
+    //T* p = m_pVectorBegin + (index);// * m_uClassSize);
+    //
+    //return *p;
     
-    return *p;
+    return *(m_pVectorBegin + index);
   }
 
   /*
