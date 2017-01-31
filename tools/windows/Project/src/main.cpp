@@ -50,6 +50,17 @@ struct Point
     return (x != sOther.x && y != sOther.y);
   }
 
+  void operator*=(float fValue)
+  {
+    x *= fValue;
+    y *= fValue;
+  }
+
+  Point operator*(float fValue)
+  {
+    return Point(x * fValue, y * fValue);
+  }
+
   Point operator-(const Point &sOther)
   {
     Point sAux(x - sOther.x, y - sOther.y);
@@ -100,36 +111,18 @@ public:
         if (sMousePos.x > m_sPosition.x && sMousePos.x < m_sPosition.x + m_sSize.x
           && sMousePos.y > m_sPosition.y && sMousePos.y < m_sPosition.y + m_sSize.y)
         {
-          printf("Yay\n");
+          printf("Button clicked\n");
           return true;
         } else
         {
           return false;
         }
-      } else
-      {
-        //printf("Wuao\n");
       }
     } else
     {
       m_bPressed = false;
       m_bCanBePressedAgain = true;
-      //printf("Nay\n");
     }
-
-    /*if (m_bPressed == true)
-    {
-      Point sMousePos;
-      sMousePos.setPos(sf::Mouse::getPosition(cWindow));
-      if (sMousePos.x > m_sPosition.x && sMousePos.x < m_sPosition.x + m_sSize.x
-        && sMousePos.y > m_sPosition.y && sMousePos.y < m_sPosition.y + m_sSize.y)
-      {
-        return true;
-      } else
-      {
-        return false;
-      }
-    }*/
 
     return false;
   }
@@ -161,23 +154,66 @@ Point sMouseFirstPos(0.0f, 0.0f);
 Point sMouseSecondPos(0.0f, 0.0f);
 sf::View cView;
 float fCurrentZoom = 1.0f;
+float fMagnifyingZoom = 0.0f;
+float fReducingZoom = 0.0f;
 elm::vector<Button> vButtons;
+byte* pGridPtr = nullptr;
+uint32 uWindowWidth = 1366;
+uint32 uWindowHeight = 768;
+bool bDrawGrid = true;
 
 int main()
 {
-  cWindow.create(sf::VideoMode(1366, 768), "WINDOW");
-  cView.reset(sf::FloatRect(0.0f, 0.0f, 1366.0f, 768.0f));
+  cWindow.create(sf::VideoMode(uWindowWidth, uWindowHeight), "WINDOW");
+  cView.reset(sf::FloatRect(0.0f, 0.0f, (float)uWindowWidth, (float)uWindowHeight));
 
   cBackgroundImage.loadFromFile("../../../Project/resources/south-hyrule-field_background.png"); 
   cBackgroundTexture.loadFromImage(cBackgroundImage);
   cBackgroundSprite.setTexture(cBackgroundTexture);
 
-  cToolPanel.setSize(sf::Vector2f(366.0f, 768.0f));
+  cToolPanel.setSize(sf::Vector2f(366.0f, (float)uWindowHeight));
   cToolPanel.setFillColor(sf::Color(96, 96, 96, 255));
   cToolPanel.setPosition(1000.0f, 0.0f);
 
   Button cZoomButton(Point(1050.0f, 675.0f), Point(50.0f, 25.0f), "Zoom");
   vButtons.pushBack(cZoomButton);
+
+  pGridPtr = (byte*)malloc(uWindowWidth * uWindowHeight * 4);
+  memset(pGridPtr, 0, uWindowWidth * uWindowHeight * 4);
+
+  byte* pAuxPtr = pGridPtr;
+  for (uint32 i = 0; i < uWindowHeight; i++)
+  {
+    for (uint32 j = 0; j < uWindowWidth; j++)
+    {
+      if (j % 16 == 0 || i % 16 == 0)
+      {
+        uint32 p = (j + uWindowWidth * i) * 4;
+        pAuxPtr[p + 0] = 255;
+        pAuxPtr[p + 1] = 0;
+        pAuxPtr[p + 2] = 255;
+        pAuxPtr[p + 3] = 32;
+      }
+    }
+  }
+
+  /*for (uint32 i = 0; i < uWindowHeight; i += 16)
+  {
+    memset((pGridPtr + (i * uWindowWidth)), 0x00ff00ff, uWindowWidth * 4);
+  }
+
+  for (uint32 i = 0; i < uWindowWidth; i += 16)
+  {
+    memset((pGridPtr + (i * uWindowHeight)), 0x00ff00ff, uWindowHeight * 4);
+  }*/
+
+  sf::Texture cGridTexture;
+  cGridTexture.create(uWindowWidth, uWindowHeight);
+  cGridTexture.update(pGridPtr);
+
+  sf::Sprite cGridSprite;
+  cGridSprite.setTexture(cGridTexture);
+  cGridSprite.setPosition(0.0f, 0.0f);
 
   while (cWindow.isOpen())
   {
@@ -190,13 +226,16 @@ int main()
         if (cEvent.mouseWheel.delta > 0)
         {
           fCurrentZoom = 1.0f;
-          fCurrentZoom -= 0.01f;
+          fMagnifyingZoom += 0.01f;
+          fCurrentZoom -= fMagnifyingZoom;
         } else if (cEvent.mouseWheel.delta < 0)
         {
           fCurrentZoom = 1.0f;
-          fCurrentZoom += 0.01f;
+          fReducingZoom += 0.01f;
+          fCurrentZoom += fReducingZoom;
         }
         cView.zoom(fCurrentZoom);
+        //printf("Zoom: %f\n", fCurrentZoom);
       }
     }
 
@@ -221,10 +260,11 @@ int main()
         if (bIsMousePressed == true)
         {
           sMouseSecondPos.setPos(sf::Mouse::getPosition(cWindow));
+          //if (sMouseFirstPos * fCurrentZoom != sMouseSecondPos * fCurrentZoom)
           if (sMouseFirstPos != sMouseSecondPos)
           {
-            sImagePos.setPos(sImagePosDrag.x + (sMouseSecondPos.x - sMouseFirstPos.x),
-              sImagePosDrag.y + (sMouseSecondPos.y - sMouseFirstPos.y));
+            sImagePos.setPos((sImagePosDrag.x - (sMouseSecondPos.x - sMouseFirstPos.x)),
+              (sImagePosDrag.y - (sMouseSecondPos.y - sMouseFirstPos.y)));
           }
         }
       }
@@ -237,33 +277,31 @@ int main()
       sImagePosDrag.setPos(sImagePos);
     }
 
-    for (uint32 i = 0; i < vButtons.size(); i++)
+    /*for (uint32 i = 0; i < vButtons.size(); i++)
     {
-      if (vButtons[i].isClicked() == true)
-      {
-        /*int j;
-        j++;*/
-      }
-    }
-    /*if (cZoomButton.isClicked() == true)
-    {
-      int i;
-      i++;
+      vButtons[i].isClicked();
     }*/
+    if (cZoomButton.isClicked() == true)
+    {
+      bDrawGrid = !bDrawGrid;
+    }
     // [INPUT]
 
 
     // [UPDATE]
     cBackgroundSprite.setPosition(sImagePos.x, sImagePos.y);
-    //cView.zoom(fCurrentZoom);
+    cGridSprite.setPosition(cBackgroundSprite.getPosition());
     // [UPDATE]
-
+    
 
     // [DRAW]
     cWindow.setView(cView);
     cWindow.clear();
-    
     cWindow.draw(cBackgroundSprite);
+    if (bDrawGrid == true)
+    {
+      cWindow.draw(cGridSprite);
+    }
 
     cWindow.setView(cWindow.getDefaultView());
     //cWindow.clear();
@@ -277,5 +315,6 @@ int main()
     // [DRAW]
   }
 
+  free(pGridPtr);
   return 0;
 }

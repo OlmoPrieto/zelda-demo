@@ -34,7 +34,7 @@ public:
       for (unsigned int i = 0; i < m_uCount; i++)
       {
         pPtr->~T();
-
+        // TODO: bug here
         pPtr++;
       }
     }
