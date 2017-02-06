@@ -1,147 +1,11 @@
 #include <iostream>
-#include <SFML/Graphics.hpp>
 
+#include "misc.h"
 #include "vector.h"
 
 sf::RenderWindow cWindow;
-
-struct Point
-{
-  Point() : x(0.0f), y(0.0f) {}
-  Point(float x_, float y_) : x(x_), y(y_) {}
-
-  void move(float x_, float y_)
-  {
-    x += x_;
-    y += y_;
-  }
-
-  void move(const Point &sPoint)
-  {
-    x += sPoint.x;
-    y += sPoint.y;
-  }
-
-  void setPos(float x_, float y_)
-  {
-    x = x_;
-    y = y_;
-  }
-
-  void setPos(const sf::Vector2i &sPosition)
-  {
-    x = (int)sPosition.x;
-    y = (int)sPosition.y;
-  }
-
-  void setPos(const Point &sPoint)
-  {
-    x = sPoint.x;
-    y = sPoint.y;
-  }
-
-  bool operator==(const Point &sOther)
-  {
-    return (x == sOther.x && y == sOther.y);
-  }
-
-  bool operator!= (const Point &sOther)
-  {
-    return (x != sOther.x && y != sOther.y);
-  }
-
-  void operator*=(float fValue)
-  {
-    x *= fValue;
-    y *= fValue;
-  }
-
-  Point operator*(float fValue)
-  {
-    return Point(x * fValue, y * fValue);
-  }
-
-  Point operator-(const Point &sOther)
-  {
-    Point sAux(x - sOther.x, y - sOther.y);
-
-    return sAux;
-  }
-
-  float x;
-  float y;
-};
-
-class Button
-{
-public:
-  Button(const Point &sPosition, const Point &sSize, const std::string &cLabel)
-  {
-    m_sPosition = sPosition;
-    m_sSize = sSize;
-    m_bPressed = false;
-    m_bCanBePressedAgain = true;
-
-    if (m_cFont.loadFromFile("../../../Project/resources/arial.ttf") == false)
-    {
-      printf("Failed to load font\n");
-    }
-    m_cLabel.setFont(m_cFont);
-    m_cLabel.setString(cLabel);
-    m_cLabel.setCharacterSize(10);
-    m_cLabel.setPosition(sPosition.x + sSize.x * 0.1f, sPosition.y + sSize.y / 4.0f);
-    m_cLabel.setColor(sf::Color::Black);
-
-    m_cBox.setSize(sf::Vector2f(sSize.x, sSize.y));
-    m_cBox.setPosition(sPosition.x, sPosition.y);
-  }
-
-  bool isClicked()
-  {
-    if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left) == true)
-    {
-      m_bPressed = true;
-
-      if (m_bCanBePressedAgain == true) 
-      {
-        m_bCanBePressedAgain = false;
-
-        Point sMousePos;
-        sMousePos.setPos(sf::Mouse::getPosition(cWindow));
-        if (sMousePos.x > m_sPosition.x && sMousePos.x < m_sPosition.x + m_sSize.x
-          && sMousePos.y > m_sPosition.y && sMousePos.y < m_sPosition.y + m_sSize.y)
-        {
-          printf("Button clicked\n");
-          return true;
-        } else
-        {
-          return false;
-        }
-      }
-    } else
-    {
-      m_bPressed = false;
-      m_bCanBePressedAgain = true;
-    }
-
-    return false;
-  }
-
-  void draw(sf::RenderWindow *cTarget)
-  {
-    cTarget->draw(m_cBox);
-    cTarget->draw(m_cLabel);
-  }
-
-  Point m_sPosition;
-  Point m_sSize;
-  sf::RectangleShape m_cBox;
-  sf::Text m_cLabel;
-  sf::Font m_cFont;
-  bool m_bPressed;
-  bool m_bCanBePressedAgain;
-};
-
+uint32 uWindowWidth = 1366;
+uint32 uWindowHeight = 768;
 sf::Image cBackgroundImage;
 sf::Texture cBackgroundTexture;
 sf::Sprite cBackgroundSprite;
@@ -158,8 +22,6 @@ double fMagnifyingZoom = 0.0f;
 double fReducingZoom = 0.0f;
 elm::vector<Button> vButtons;
 byte* pGridPtr = nullptr;
-uint32 uWindowWidth = 1366;
-uint32 uWindowHeight = 768;
 bool bDrawGrid = true;
 sf::Font cFont;
 sf::Text cDebugText;
@@ -182,6 +44,8 @@ int main()
 
   Button cZoomButton(Point(1050.0f, 675.0f), Point(50.0f, 25.0f), "Zoom");
   vButtons.pushBack(cZoomButton);
+
+  TextInput cTextInput(sf::FloatRect(1050.0f, 100.0f, 100.0f, 50.0f));
 
   if (cFont.loadFromFile("../../../Project/resources/arial.ttf") == false)
   {
@@ -238,29 +102,29 @@ int main()
   while (cWindow.isOpen())
   {
     // [INPUT]
-    sf::Event cEvent;
-    while (cWindow.pollEvent(cEvent))
-    {
-      if (cEvent.type == sf::Event::MouseWheelMoved)
-      {
-        if (cEvent.mouseWheel.delta > 0)
-        {
-          fCurrentZoom = 1.0f;
-          fMagnifyingZoom += 0.01;
-          //fReducingZoom = 0.0f;
-          fCurrentZoom -= fMagnifyingZoom;
-          fReducingZoom = 0.0f;
-        } else if (cEvent.mouseWheel.delta < 0)
-        {
-          fCurrentZoom = 1.0f;
-          fReducingZoom += 0.01;
-          //fMagnifyingZoom = 0.0f;
-          fCurrentZoom += fReducingZoom;
-          fMagnifyingZoom = 0.0f;
-        }
-        cView.zoom(fCurrentZoom);
-      }
-    }
+    //sf::Event cEvent;
+    //while (cWindow.pollEvent(cEvent))
+    //{
+    //  if (cEvent.type == sf::Event::MouseWheelMoved)
+    //  {
+    //    if (cEvent.mouseWheel.delta > 0)
+    //    {
+    //      fCurrentZoom = 1.0f;
+    //      fMagnifyingZoom += 0.01;
+    //      //fReducingZoom = 0.0f;
+    //      fCurrentZoom -= fMagnifyingZoom;
+    //      fReducingZoom = 0.0f;
+    //    } else if (cEvent.mouseWheel.delta < 0)
+    //    {
+    //      fCurrentZoom = 1.0f;
+    //      fReducingZoom += 0.01;
+    //      //fMagnifyingZoom = 0.0f;
+    //      fCurrentZoom += fReducingZoom;
+    //      fMagnifyingZoom = 0.0f;
+    //    }
+    //    cView.zoom(fCurrentZoom);
+    //  }
+    //}
 
     sf::Keyboard::Key eKey;
 
@@ -335,10 +199,12 @@ int main()
     {
       vButtons[i].isClicked();
     }*/
-    if (cZoomButton.isClicked() == true)
+    if (cZoomButton.isClicked(&cWindow) == true)
     {
       bDrawGrid = !bDrawGrid;
     }
+    cTextInput.isClicked(&cWindow);
+    cTextInput.processInput(&cWindow);
     // [INPUT]
 
 
@@ -370,6 +236,7 @@ int main()
     {
       vButtons[i].draw(&cWindow);
     }
+    cTextInput.draw(&cWindow);
     cWindow.display();
     // [DRAW]
   }

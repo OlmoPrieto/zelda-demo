@@ -31,7 +31,7 @@ solution (proj_name)
       
       files{ group = "include", project_dir .. "/include/**.h" } -- include filter and get the files
       files{ group = "src", project_dir .. "/src/**.cc", "./Project/src/**.cpp" } -- src filter and get the files
-      
+      files{ group = "dependencies", project_dir .. "../../../Project/src/chrono.cpp" }
 
       configuration "Debug"
         defines { "DEBUG" }
