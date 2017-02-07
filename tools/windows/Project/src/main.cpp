@@ -45,7 +45,8 @@ int main()
   Button cZoomButton(Point(1050.0f, 675.0f), Point(50.0f, 25.0f), "Zoom");
   vButtons.pushBack(cZoomButton);
 
-  TextInput cTextInput(sf::FloatRect(1050.0f, 100.0f, 100.0f, 50.0f));
+  TextInput cTextInput(sf::FloatRect(1050.0f, 100.0f, 100.0f, 25.0f));
+  std::string cBla = "HOLI";
 
   if (cFont.loadFromFile("../../../Project/resources/arial.ttf") == false)
   {
@@ -102,29 +103,29 @@ int main()
   while (cWindow.isOpen())
   {
     // [INPUT]
-    //sf::Event cEvent;
-    //while (cWindow.pollEvent(cEvent))
-    //{
-    //  if (cEvent.type == sf::Event::MouseWheelMoved)
-    //  {
-    //    if (cEvent.mouseWheel.delta > 0)
-    //    {
-    //      fCurrentZoom = 1.0f;
-    //      fMagnifyingZoom += 0.01;
-    //      //fReducingZoom = 0.0f;
-    //      fCurrentZoom -= fMagnifyingZoom;
-    //      fReducingZoom = 0.0f;
-    //    } else if (cEvent.mouseWheel.delta < 0)
-    //    {
-    //      fCurrentZoom = 1.0f;
-    //      fReducingZoom += 0.01;
-    //      //fMagnifyingZoom = 0.0f;
-    //      fCurrentZoom += fReducingZoom;
-    //      fMagnifyingZoom = 0.0f;
-    //    }
-    //    cView.zoom(fCurrentZoom);
-    //  }
-    //}
+    sf::Event cEvent;
+    while (cWindow.pollEvent(cEvent))
+    {
+      if (cEvent.type == sf::Event::MouseWheelMoved)
+      {
+        if (cEvent.mouseWheel.delta > 0)
+        {
+          fCurrentZoom = 1.0f;
+          fMagnifyingZoom += 0.01;
+          //fReducingZoom = 0.0f;
+          fCurrentZoom -= fMagnifyingZoom;
+          fReducingZoom = 0.0f;
+        } else if (cEvent.mouseWheel.delta < 0)
+        {
+          fCurrentZoom = 1.0f;
+          fReducingZoom += 0.01;
+          //fMagnifyingZoom = 0.0f;
+          fCurrentZoom += fReducingZoom;
+          fMagnifyingZoom = 0.0f;
+        }
+        cView.zoom(fCurrentZoom);
+      }
+    }
 
     sf::Keyboard::Key eKey;
 
@@ -201,7 +202,8 @@ int main()
     }*/
     if (cZoomButton.isClicked(&cWindow) == true)
     {
-      bDrawGrid = !bDrawGrid;
+      //bDrawGrid = !bDrawGrid;
+      cTextInput.setString(cBla);
     }
     cTextInput.isClicked(&cWindow);
     cTextInput.processInput(&cWindow);

@@ -8,6 +8,18 @@
 #include "chrono.h"
 
 typedef unsigned int uint32;
+typedef unsigned char byte;
+
+static inline uint32 lerp(uint32 uA, uint32 uB, float fAlpha)
+{
+  return (uA + fAlpha * (uB - uA));
+}
+
+template <class T> 
+static inline T lerp(const T& cA, const T& cB, float fAlpha)
+{
+  return (cA + fAlpha * (cB - cA));
+}
 
 struct Point
 {
@@ -153,12 +165,14 @@ public:
   TextInput(const sf::FloatRect &sDimensions)
   {
     m_cString = "";
-    m_fBlinkTime = 1.0f;
+    m_fBlinkTime = 0.5f;
+    //m_fBlinkTime = 1000.0f;
     m_fInputTime = 0.15f;
     m_fNoInputAccTime = 0.0f;
     m_fBlinkAccTime = 0.0f;
     m_fCursorYOffset = sDimensions.top + sDimensions.height * 0.05f;
     m_uCursorIndex = 0;
+    m_byAlphaLerp = 255;
     m_bHasFocus = false;
     m_bBlinkDown = true;
 
@@ -167,7 +181,7 @@ public:
       printf("Failed to load font\n");
     }
     m_cText.setFont(m_cFont);
-    m_cText.setCharacterSize(sDimensions.height /*25*/);
+    m_cText.setCharacterSize(uint32(sDimensions.height) /*25*/);
     m_cText.setColor(sf::Color::Black);
     m_cText.setPosition(sDimensions.left + sDimensions.width * 0.05f,
       sDimensions.top - sDimensions.height * 0.15f);
@@ -187,6 +201,20 @@ public:
 
     m_cBlinkChrono.start();
     m_cInputChrono.start();
+  }
+
+  std::string& getString()
+  {
+    return m_cString;
+  }
+
+  void setString(const std::string &cString)
+  {
+    m_cString = cString;
+    
+    m_cText.setString(cString);
+    m_uCursorIndex = cString.size();
+    m_cCursor.setPosition(m_cText.findCharacterPos(m_uCursorIndex).x, m_fCursorYOffset);
   }
 
   bool isClicked(sf::RenderWindow *pTarget)
@@ -351,6 +379,36 @@ public:
       } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Z))
       {
         eKeyPressed = sf::Keyboard::Key::Z;
+      } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Num0))
+      {
+        eKeyPressed = sf::Keyboard::Key::Num0;
+      } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Num1))
+      {
+        eKeyPressed = sf::Keyboard::Key::Num1;
+      } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Num2))
+      {
+        eKeyPressed = sf::Keyboard::Key::Num2;
+      } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Num3))
+      {
+        eKeyPressed = sf::Keyboard::Key::Num3;
+      } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Num4))
+      {
+        eKeyPressed = sf::Keyboard::Key::Num4;
+      } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Num5))
+      {
+        eKeyPressed = sf::Keyboard::Key::Num5;
+      } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Num6))
+      {
+        eKeyPressed = sf::Keyboard::Key::Num6;
+      } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Num7))
+      {
+        eKeyPressed = sf::Keyboard::Key::Num7;
+      } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Num8))
+      {
+        eKeyPressed = sf::Keyboard::Key::Num8;
+      } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Num9))
+      {
+        eKeyPressed = sf::Keyboard::Key::Num9;
       }
 
       if (sf::Keyboard::isKeyPressed(sf::Keyboard::LShift))
@@ -394,7 +452,7 @@ public:
               m_cText.setString(m_cString);
               m_uCursorIndex--;
             }
-          } else if (eKeyPressed >= sf::Keyboard::Key::A && eKeyPressed <= sf::Keyboard::Key::Z)
+          } else if (eKeyPressed >= sf::Keyboard::Key::A && eKeyPressed <= sf::Keyboard::Key::Num9)
           {
             char cWord = 'a';
             switch (eKeyPressed)
@@ -425,6 +483,16 @@ public:
             case sf::Keyboard::Key::X: cWord = 'x'; break;
             case sf::Keyboard::Key::Y: cWord = 'y'; break;
             case sf::Keyboard::Key::Z: cWord = 'z'; break;
+            case sf::Keyboard::Key::Num0: cWord = '0'; break;
+            case sf::Keyboard::Key::Num1: cWord = '1'; break;
+            case sf::Keyboard::Key::Num2: cWord = '2'; break;
+            case sf::Keyboard::Key::Num3: cWord = '3'; break;
+            case sf::Keyboard::Key::Num4: cWord = '4'; break;
+            case sf::Keyboard::Key::Num5: cWord = '5'; break;
+            case sf::Keyboard::Key::Num6: cWord = '6'; break;
+            case sf::Keyboard::Key::Num7: cWord = '7'; break;
+            case sf::Keyboard::Key::Num8: cWord = '8'; break;
+            case sf::Keyboard::Key::Num9: cWord = '9'; break;
             }
 
             if (bShiftPressed == true)
@@ -446,33 +514,39 @@ public:
 
   void draw(sf::RenderWindow *pTarget)
   {
-    m_cBlinkChrono.stop();
-    static float sfCurrentTime = m_fBlinkAccTime;
-    m_fBlinkAccTime += m_cBlinkChrono.timeAsSeconds() - sfCurrentTime;
-    m_cBlinkChrono.start();
+    if (m_bHasFocus == true)
+    {
+      m_cBlinkChrono.stop();
+      m_fBlinkAccTime += m_cBlinkChrono.timeAsSeconds();
+      m_cBlinkChrono.start();
+    
+      if (m_fBlinkAccTime >= m_fBlinkTime)
+      {
+        m_fBlinkAccTime = 0.0f;
+        if (m_bBlinkDown == true)
+        {
+          m_bBlinkDown = false;
+        } else
+        {
+          m_bBlinkDown = true;
+        }
+      }
 
-    sf::Color cColor = m_cCursor.getFillColor();
-    if (m_bBlinkDown == true)
-    {
-      if (cColor.a > 0)
+      if (m_bBlinkDown == false)
       {
-        cColor.a -= 1;
+        m_byAlphaLerp = lerp<byte>(0, 255, m_fBlinkAccTime / m_fBlinkTime);
       } else
       {
-        m_bBlinkDown = false;
+        m_byAlphaLerp = lerp<byte>(255, 0, m_fBlinkAccTime / m_fBlinkTime);
       }
-    } else 
+    
+      sf::Color cColor = m_cCursor.getFillColor();
+      cColor.a = m_byAlphaLerp;
+      m_cCursor.setFillColor(cColor);
+    } else
     {
-      if (cColor.a < 255)
-      {
-        cColor.a += 1;
-      } else
-      {
-        m_bBlinkDown = true;
-      }
+      m_cCursor.setFillColor(sf::Color::Black);
     }
-
-    m_cCursor.setFillColor(cColor);
 
     pTarget->draw(m_cTextBox);
     pTarget->draw(m_cText);
@@ -493,6 +567,7 @@ public:
   float m_fBlinkAccTime;
   float m_fCursorYOffset;
   uint32 m_uCursorIndex;
+  byte m_byAlphaLerp;
   bool m_bHasFocus;
   bool m_bBlinkDown;
 };
