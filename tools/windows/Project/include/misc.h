@@ -127,7 +127,6 @@ public:
         if (sMousePos.x > m_sPosition.x && sMousePos.x < m_sPosition.x + m_sSize.x
           && sMousePos.y > m_sPosition.y && sMousePos.y < m_sPosition.y + m_sSize.y)
         {
-          printf("Button clicked\n");
           return true;
         } else
         {
@@ -162,7 +161,7 @@ public:
 class TextInput
 {
 public:
-  TextInput(const sf::FloatRect &sDimensions)
+  TextInput(const sf::FloatRect &sDimensions, uint32 uStringMaxLenght)
   {
     m_cString = "";
     m_fBlinkTime = 0.5f;
@@ -172,6 +171,7 @@ public:
     m_fBlinkAccTime = 0.0f;
     m_fCursorYOffset = sDimensions.top + sDimensions.height * 0.05f;
     m_uCursorIndex = 0;
+    m_uStringMaxLenght = uStringMaxLenght;
     m_byAlphaLerp = 255;
     m_bHasFocus = false;
     m_bBlinkDown = true;
@@ -500,9 +500,12 @@ public:
               cWord -= 32;
             }
 
-            m_cString.insert(m_uCursorIndex, 1, cWord);
-            m_cText.setString(m_cString);
-            m_uCursorIndex++;
+            if (m_cString.size() < m_uStringMaxLenght)
+            {
+              m_cString.insert(m_uCursorIndex, 1, cWord);
+              m_cText.setString(m_cString);
+              m_uCursorIndex++;
+            }
           }
 
           // Update cursor
@@ -567,6 +570,7 @@ public:
   float m_fBlinkAccTime;
   float m_fCursorYOffset;
   uint32 m_uCursorIndex;
+  uint32 m_uStringMaxLenght;
   byte m_byAlphaLerp;
   bool m_bHasFocus;
   bool m_bBlinkDown;
