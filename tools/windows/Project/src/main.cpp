@@ -33,9 +33,30 @@ uint32 uTileSize = 16;
 sf::Texture cGridTexture;
 sf::Sprite cGridSprite;
 Point sGridPosition;
+int uUserTileSize = 0;
 
 void createGrid(uint32 uBeginX, uint32 uBeginY, uint32 uWidth, uint32 uHeight)
 {
+  // find tile size
+  uGridWidth = uWidth - uBeginX;
+  uGridHeight = uHeight - uBeginY;
+  uint32 uDivider = 0;
+  if (uUserTileSize == -1)
+  {
+    uGridHeight <= uGridWidth ? uDivider = uGridHeight : uDivider = uGridWidth;
+    bool bIsDivisor = (uGridWidth % uDivider == 0 && uGridHeight % uDivider == 0);
+    while (bIsDivisor == false)
+    {
+      uDivider--;
+      bIsDivisor = (uGridWidth % uDivider == 0 && uGridHeight % uDivider == 0);
+    }
+
+    uTileSize = uDivider;
+  } else
+  {
+    uTileSize = uUserTileSize;
+  }
+
   if (pGridPtr != nullptr)
   {
     free(pGridPtr);
@@ -62,11 +83,7 @@ void createGrid(uint32 uBeginX, uint32 uBeginY, uint32 uWidth, uint32 uHeight)
   /* THE PROBLEM MUST BE IN SFML texture OR sprite */ /* FUCKING TRUE */
   cGridTexture = sf::Texture();
   cGridTexture.create((uWidth - uBeginX + 1), (uHeight - uBeginY + 1));
-  //byte* pCleanup = (byte*)malloc((uWidth - uBeginX + 1) * (uHeight - uBeginY + 1) * 4);
-  //memset(pCleanup, 0, (uWidth - uBeginX + 1) * (uHeight - uBeginY + 1) * 4);
-  //cGridTexture.update(pCleanup);
   cGridTexture.update(pGridPtr);
-  //free(pCleanup);
 
   cGridSprite = sf::Sprite();
   cGridSprite.setTexture(cGridTexture);
@@ -91,29 +108,43 @@ int main()
 
   Button cGridButton(Point(1050.0f, 675.0f), Point(80.0f, 25.0f), "SHOW GRID");
 
-  TextInput cXTextInput(sf::FloatRect(1050.0f, 100.0f, 100.0f, 25.0f), 5);
-  TextInput cYTextInput(sf::FloatRect(cXTextInput.m_cDimensions.left + 
-    cXTextInput.m_cDimensions.width + cXTextInput.m_cDimensions.width * 0.2f, 
-    cXTextInput.m_cDimensions.top, 100.0f, 25.0f), 5);
-  TextInput cWidthTextInput(sf::FloatRect(cXTextInput.m_cDimensions.left, 
-    cXTextInput.m_cDimensions.top + cXTextInput.m_cDimensions.height + 
-    cXTextInput.m_cDimensions.height * 0.2, 100.0f, 25.0f), 5);
-  TextInput cHeightTextInput(sf::FloatRect(cYTextInput.m_cDimensions.left, 
-    cYTextInput.m_cDimensions.top + cYTextInput.m_cDimensions.height + 
-    cYTextInput.m_cDimensions.height * 0.2, 100.0f, 25.0f), 5);
-  std::string cXValue = cXTextInput.getString();
-  std::string cYValue = cYTextInput.getString();
-  std::string cWidthValue = cWidthTextInput.getString();
-  std::string cHeightValue = cHeightTextInput.getString();
+  TextInput cX1TextInput(sf::FloatRect(1050.0f, 100.0f, 100.0f, 25.0f), 5);
+  TextInput cY1TextInput(sf::FloatRect(cX1TextInput.m_cDimensions.left + 
+    cX1TextInput.m_cDimensions.width + cX1TextInput.m_cDimensions.width * 0.2f, 
+    cX1TextInput.m_cDimensions.top, 100.0f, 25.0f), 5);
+  TextInput cX2TextInput(sf::FloatRect(cX1TextInput.m_cDimensions.left, 
+    cX1TextInput.m_cDimensions.top + cX1TextInput.m_cDimensions.height + 
+    cX1TextInput.m_cDimensions.height * 0.2, 100.0f, 25.0f), 5);
+  TextInput cY2TextInput(sf::FloatRect(cY1TextInput.m_cDimensions.left, 
+    cY1TextInput.m_cDimensions.top + cY1TextInput.m_cDimensions.height + 
+    cY1TextInput.m_cDimensions.height * 0.2, 100.0f, 25.0f), 5);
+  std::string cXValue = cX1TextInput.getString();
+  std::string cYValue = cY1TextInput.getString();
+  std::string cX2Value = cX2TextInput.getString();
+  std::string cY2Value = cY2TextInput.getString();
+
+  TextInput cTileSizeTextInput(sf::FloatRect(cX2TextInput.m_cDimensions.left, 
+    cX2TextInput.m_cDimensions.top + cX2TextInput.m_cDimensions.height + 
+    cX2TextInput.m_cDimensions.height * 0.2f, cX2TextInput.m_cDimensions.width, 
+    cX2TextInput.m_cDimensions.height), 5);
+
+  sf::Text cTileSizeInfoText;
+  cTileSizeInfoText.setFont(cFont);
+  cTileSizeInfoText.setCharacterSize(15);
+  cTileSizeInfoText.setString("<- Tile size (-1 for best fit)");
+  cTileSizeInfoText.setColor(sf::Color::Black);
+  cTileSizeInfoText.setPosition(cTileSizeTextInput.m_cDimensions.left + 
+    cTileSizeTextInput.m_cDimensions.width + cTileSizeTextInput.m_cDimensions.width * 0.2f,
+    cTileSizeTextInput.m_cDimensions.top + cTileSizeTextInput.m_cDimensions.height * 0.2f);
 
   sf::Text cWarning;
   cWarning.setFont(cFont);
   cWarning.setCharacterSize(20);
   cWarning.setString("click when all fields are filled");
   cWarning.setColor(sf::Color::Black);
-  Point cWarningPos(cWidthTextInput.m_cDimensions.left,
-    cWidthTextInput.m_cDimensions.top + cWidthTextInput.m_cDimensions.height +
-    cWidthTextInput.m_cDimensions.height * 0.5f);
+  Point cWarningPos(cTileSizeTextInput.m_cDimensions.left,
+    cTileSizeTextInput.m_cDimensions.top + cTileSizeTextInput.m_cDimensions.height +
+    cTileSizeTextInput.m_cDimensions.height * 0.5f);
   cWarning.setPosition(cWarningPos.x, cWarningPos.y);
   
   Button cTextureParametersButton(Point(uWindowWidth - uWindowWidth * 0.04f, 
@@ -249,10 +280,10 @@ int main()
         int uTileXIndex = (iXPos - int(sImagePos.x)) / int(uTileSize);
         int uTileYIndex = (iYPos - int(sImagePos.y)) / int(uTileSize);
         
-        cDebugText.setString(std::to_string(sImagePos.x) + " , " + std::to_string(sImagePos.y) + "\n\n" + 
-          std::to_string(iXPos - int(sImagePos.x)) + " , " + std::to_string(iYPos - int(sImagePos.y)) + "\n\n" + 
-          std::to_string(uTileXIndex) + " , " + std::to_string(uTileYIndex) + "\n\n" + 
-          std::to_string(iXPos) + " , " + std::to_string(iYPos) + "\n\n");
+        cDebugText.setString(std::to_string(sImagePos.x) + " , " + std::to_string(sImagePos.y) + "\n" + 
+          std::to_string(iXPos - int(sImagePos.x)) + " , " + std::to_string(iYPos - int(sImagePos.y)) + "\n" + 
+          std::to_string(uTileXIndex) + " , " + std::to_string(uTileYIndex) + "\n" + 
+          std::to_string(iXPos) + " , " + std::to_string(iYPos) + "\n");
 
         cSelectedTile.setPosition(((uTileXIndex * uTileSize) + sImagePos.x), (uTileYIndex * uTileSize) + sImagePos.y);
         bIsTileSelected = true;
@@ -273,28 +304,33 @@ int main()
     }
     if (cTextureParametersButton.isClicked(&cWindow) == true)
     {
-      cXValue = cXTextInput.getString();
-      cYValue = cYTextInput.getString();
-      cWidthValue = cWidthTextInput.getString();
-      cHeightValue = cHeightTextInput.getString();
+      cXValue = cX1TextInput.getString();
+      cYValue = cY1TextInput.getString();
+      cX2Value = cX2TextInput.getString();
+      cY2Value = cY2TextInput.getString();
 
-      uGridWidth = std::atoi(cWidthValue.c_str());
-      uGridHeight = std::atoi(cHeightValue.c_str());
+      uint32 uX1Value = std::atoi(cXValue.c_str());
+      uint32 uY1Value = std::atoi(cYValue.c_str());
+      uint32 uX2Value = std::atoi(cX2Value.c_str());
+      uint32 uY2Value = std::atoi(cY2Value.c_str());
 
-      if (uGridWidth > 0 && uGridHeight)
+      uUserTileSize = std::atoi(cTileSizeTextInput.getString().c_str());
+
+      if (uX2Value > 0 && uY2Value > 0 && uUserTileSize != 0)
       {
-        createGrid(std::atoi(cXValue.c_str()), std::atoi(cYValue.c_str()), 
-          uGridWidth, uGridHeight);
+        createGrid(uX1Value, uY1Value, uX2Value, uY2Value);
       }
     }
-    cXTextInput.isClicked(&cWindow);
-    cXTextInput.processInput(&cWindow);
-    cYTextInput.isClicked(&cWindow);
-    cYTextInput.processInput(&cWindow);
-    cWidthTextInput.isClicked(&cWindow);
-    cWidthTextInput.processInput(&cWindow);
-    cHeightTextInput.isClicked(&cWindow);
-    cHeightTextInput.processInput(&cWindow);
+    cX1TextInput.isClicked(&cWindow);
+    cX1TextInput.processInput(&cWindow);
+    cY1TextInput.isClicked(&cWindow);
+    cY1TextInput.processInput(&cWindow);
+    cX2TextInput.isClicked(&cWindow);
+    cX2TextInput.processInput(&cWindow);
+    cY2TextInput.isClicked(&cWindow);
+    cY2TextInput.processInput(&cWindow);
+    cTileSizeTextInput.isClicked(&cWindow);
+    cTileSizeTextInput.processInput(&cWindow);
     // [INPUT]
 
 
@@ -327,10 +363,12 @@ int main()
     cWindow.draw(cDebugText);
 
     cGridButton.draw(&cWindow);
-    cXTextInput.draw(&cWindow);
-    cYTextInput.draw(&cWindow);
-    cWidthTextInput.draw(&cWindow);
-    cHeightTextInput.draw(&cWindow);
+    cX1TextInput.draw(&cWindow);
+    cY1TextInput.draw(&cWindow);
+    cX2TextInput.draw(&cWindow);
+    cY2TextInput.draw(&cWindow);
+    cTileSizeTextInput.draw(&cWindow);
+    cWindow.draw(cTileSizeInfoText);
     cWindow.draw(cWarning);
     cTextureParametersButton.draw(&cWindow);
 

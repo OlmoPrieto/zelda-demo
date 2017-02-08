@@ -409,6 +409,9 @@ public:
       } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Num9))
       {
         eKeyPressed = sf::Keyboard::Key::Num9;
+      } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Dash))
+      {
+        eKeyPressed = sf::Keyboard::Key::Dash;
       }
 
       if (sf::Keyboard::isKeyPressed(sf::Keyboard::LShift))
@@ -452,7 +455,7 @@ public:
               m_cText.setString(m_cString);
               m_uCursorIndex--;
             }
-          } else if (eKeyPressed >= sf::Keyboard::Key::A && eKeyPressed <= sf::Keyboard::Key::Num9)
+          } else //if (eKeyPressed >= sf::Keyboard::Key::A && eKeyPressed <= sf::Keyboard::Key::Num9)
           {
             char cWord = 'a';
             switch (eKeyPressed)
@@ -493,6 +496,11 @@ public:
             case sf::Keyboard::Key::Num7: cWord = '7'; break;
             case sf::Keyboard::Key::Num8: cWord = '8'; break;
             case sf::Keyboard::Key::Num9: cWord = '9'; break;
+            }
+
+            if (eKeyPressed == sf::Keyboard::Key::Dash)
+            {
+              cWord = '-';
             }
 
             if (bShiftPressed == true)
@@ -553,7 +561,10 @@ public:
 
     pTarget->draw(m_cTextBox);
     pTarget->draw(m_cText);
-    pTarget->draw(m_cCursor);
+    if (m_bHasFocus == true)
+    {
+      pTarget->draw(m_cCursor);
+    }
   }
 
   sf::RectangleShape m_cTextBox;
