@@ -34,6 +34,25 @@ sf::Texture cGridTexture;
 sf::Sprite cGridSprite;
 Point sGridPosition;
 int uUserTileSize = 0;
+byte* pMatrixPtr = nullptr;
+uint32 uNumMatrixElements = 0;
+
+void createMatrix()
+{
+  if (pMatrixPtr != nullptr)
+  {
+    free(pMatrixPtr);
+  }
+
+  uNumMatrixElements = (uGridWidth / uTileSize) * (uGridHeight / uTileSize);
+  pMatrixPtr = (byte*)malloc(uNumMatrixElements);
+  memset(pMatrixPtr, 0, uNumMatrixElements);
+}
+
+void setMatrixElement(uint32 uX, uint32 uY, byte byValue)
+{
+  pMatrixPtr[uX + uNumMatrixElements * uY] = byValue;
+}
 
 void createGrid(uint32 uBeginX, uint32 uBeginY, uint32 uWidth, uint32 uHeight)
 {
@@ -91,6 +110,9 @@ void createGrid(uint32 uBeginX, uint32 uBeginY, uint32 uWidth, uint32 uHeight)
   cGridSprite.setPosition(sGridPosition.x, sGridPosition.y);
   
   bDrawGrid = true;
+
+  // Now that everything is set, create the collision matrix
+  createMatrix();
 }
 
 int main()
@@ -160,46 +182,55 @@ int main()
   cDebugText.setPosition(1050.0f, 300.0f);
   cDebugText.setColor(sf::Color::Black);
 
-  //pGridPtr = (byte*)malloc(uWindowWidth * uWindowHeight * 4);
-  //memset(pGridPtr, 0, uWindowWidth * uWindowHeight * 4);
-
-  //for (uint32 i = 0; i < uWindowHeight; i++)
-  //{
-  //  for (uint32 j = 0; j < uWindowWidth; j++)
-  //  {
-  //    if (j % uTileSize == 0 || i % uTileSize == 0)
-  //    {
-  //      uint32 p = (j + uWindowWidth * i) * 4;
-  //      pGridPtr[p + 0] = 255;
-  //      pGridPtr[p + 1] = 0;
-  //      pGridPtr[p + 2] = 255;
-  //      pGridPtr[p + 3] = 32;
-  //    }
-  //  }
-  //} // for()
-
-  /*for (uint32 i = 0; i < uWindowHeight; i += 16)
-  {
-    memset((pGridPtr + (i * uWindowWidth)), 0x00ff00ff, uWindowWidth * 4);
-  }
-
-  for (uint32 i = 0; i < uWindowWidth; i += 16)
-  {
-    memset((pGridPtr + (i * uWindowHeight)), 0x00ff00ff, uWindowHeight * 4);
-  }*/
-
-  /*sf::Texture cGridTexture;
-  cGridTexture.create(uWindowWidth, uWindowHeight);
-  cGridTexture.update(pGridPtr);
-
-  sf::Sprite cGridSprite;
-  cGridSprite.setTexture(cGridTexture);
-  cGridSprite.setPosition(0.0f, 0.0f);*/
-
   cSelectedTile.setSize(sf::Vector2f(float(uTileSize) + 1.0f, float(uTileSize) + 1.0f));
   cSelectedTile.setFillColor(sf::Color::Transparent);
   cSelectedTile.setOutlineColor(sf::Color(255, 0, 0, 255));
   cSelectedTile.setOutlineThickness(-1.0f);
+
+  sf::RectangleShape cZeroTile;
+  cZeroTile.setSize(sf::Vector2f(25.0f, 25.0f));
+  cZeroTile.setPosition(sf::Vector2f(cX2TextInput.m_cDimensions.left, 
+    cX2TextInput.m_cDimensions.top + cX2TextInput.m_cDimensions.height * 5.0f));
+  cZeroTile.setFillColor(sf::Color::Transparent);
+  cZeroTile.setOutlineColor(sf::Color::Black);
+  cZeroTile.setOutlineThickness(-1.0f);
+  sf::Text cZeroTileText;
+  cZeroTileText.setFont(cFont);
+  cZeroTileText.setCharacterSize(15);
+  cZeroTileText.setString("0");
+  cZeroTileText.setColor(sf::Color::Black);
+  cZeroTileText.setPosition(cZeroTile.getPosition().x + cZeroTile.getGlobalBounds().width * 0.35f, 
+    cZeroTile.getPosition().y + cZeroTile.getGlobalBounds().height * 0.15f);
+
+  sf::RectangleShape cOneTile;
+  cOneTile.setSize(sf::Vector2f(25.0f, 25.0f));
+  cOneTile.setPosition(sf::Vector2f(cZeroTile.getPosition().x + cZeroTile.getGlobalBounds().width * 2.0f,
+    cZeroTile.getPosition().y));
+  cOneTile.setFillColor(sf::Color(255, 0, 0, 128));
+  cOneTile.setOutlineColor(sf::Color::Black);
+  cOneTile.setOutlineThickness(-1.0f);
+  sf::Text cOneTileText;
+  cOneTileText.setFont(cFont);
+  cOneTileText.setCharacterSize(15);
+  cOneTileText.setString("1");
+  cOneTileText.setColor(sf::Color::Black);
+  cOneTileText.setPosition(cOneTile.getPosition().x + cOneTile.getGlobalBounds().width * 0.35f,
+    cOneTile.getPosition().y + cOneTile.getGlobalBounds().height * 0.15f);
+
+  sf::RectangleShape cTwoTile;
+  cTwoTile.setSize(sf::Vector2f(25.0f, 25.0f));
+  cTwoTile.setPosition(sf::Vector2f(cOneTile.getPosition().x + cOneTile.getGlobalBounds().width * 2.0f,
+    cOneTile.getPosition().y));
+  cTwoTile.setFillColor(sf::Color(0, 255, 0, 128));
+  cTwoTile.setOutlineColor(sf::Color::Black);
+  cTwoTile.setOutlineThickness(-1.0f);
+  sf::Text cTwoTileText;
+  cTwoTileText.setFont(cFont);
+  cTwoTileText.setCharacterSize(15);
+  cTwoTileText.setString("2");
+  cTwoTileText.setColor(sf::Color::Black);
+  cTwoTileText.setPosition(cTwoTile.getPosition().x + cTwoTile.getGlobalBounds().width * 0.35f,
+    cTwoTile.getPosition().y + cTwoTile.getGlobalBounds().height * 0.15f);
 
   while (cWindow.isOpen())
   {
@@ -370,12 +401,26 @@ int main()
     cTileSizeTextInput.draw(&cWindow);
     cWindow.draw(cTileSizeInfoText);
     cWindow.draw(cWarning);
+    cWindow.draw(cZeroTile);
+    cWindow.draw(cZeroTileText);
+    cWindow.draw(cOneTile);
+    cWindow.draw(cOneTileText);
+    cWindow.draw(cTwoTile);
+    cWindow.draw(cTwoTileText);
     cTextureParametersButton.draw(&cWindow);
 
     cWindow.display();
     // [DRAW]
   }
 
-  free(pGridPtr);
+  if (pGridPtr != nullptr)
+  {
+    free(pGridPtr);
+  }
+  if (pMatrixPtr != nullptr)
+  {
+    free(pMatrixPtr);
+  }
+
   return 0;
 }
