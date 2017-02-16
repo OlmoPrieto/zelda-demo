@@ -20,7 +20,7 @@ sf::View cView;
 double fCurrentZoom = 1.0f;
 double fMagnifyingZoom = 0.0f;
 double fReducingZoom = 0.0f;
-elm::vector<Button> vButtons;
+elm::vector<Button> vGridButtons;
 byte* pGridPtr = nullptr;
 uint32 uGridWidth = 0;
 uint32 uGridHeight = 0;
@@ -187,50 +187,40 @@ int main()
   cSelectedTile.setOutlineColor(sf::Color(255, 0, 0, 255));
   cSelectedTile.setOutlineThickness(-1.0f);
 
-  sf::RectangleShape cZeroTile;
-  cZeroTile.setSize(sf::Vector2f(25.0f, 25.0f));
-  cZeroTile.setPosition(sf::Vector2f(cX2TextInput.m_cDimensions.left, 
-    cX2TextInput.m_cDimensions.top + cX2TextInput.m_cDimensions.height * 5.0f));
-  cZeroTile.setFillColor(sf::Color::Transparent);
-  cZeroTile.setOutlineColor(sf::Color::Black);
-  cZeroTile.setOutlineThickness(-1.0f);
-  sf::Text cZeroTileText;
-  cZeroTileText.setFont(cFont);
-  cZeroTileText.setCharacterSize(15);
-  cZeroTileText.setString("0");
-  cZeroTileText.setColor(sf::Color::Black);
-  cZeroTileText.setPosition(cZeroTile.getPosition().x + cZeroTile.getGlobalBounds().width * 0.35f, 
-    cZeroTile.getPosition().y + cZeroTile.getGlobalBounds().height * 0.15f);
+  {
+    Button cButton(Point(cX2TextInput.m_cDimensions.left,
+      cX2TextInput.m_cDimensions.top + cX2TextInput.m_cDimensions.height * 5.0f),
+      Point(25.0f, 25.0f), "0", sf::Color::Transparent, true);
 
-  sf::RectangleShape cOneTile;
-  cOneTile.setSize(sf::Vector2f(25.0f, 25.0f));
-  cOneTile.setPosition(sf::Vector2f(cZeroTile.getPosition().x + cZeroTile.getGlobalBounds().width * 2.0f,
-    cZeroTile.getPosition().y));
-  cOneTile.setFillColor(sf::Color(255, 0, 0, 128));
-  cOneTile.setOutlineColor(sf::Color::Black);
-  cOneTile.setOutlineThickness(-1.0f);
-  sf::Text cOneTileText;
-  cOneTileText.setFont(cFont);
-  cOneTileText.setCharacterSize(15);
-  cOneTileText.setString("1");
-  cOneTileText.setColor(sf::Color::Black);
-  cOneTileText.setPosition(cOneTile.getPosition().x + cOneTile.getGlobalBounds().width * 0.35f,
-    cOneTile.getPosition().y + cOneTile.getGlobalBounds().height * 0.15f);
+    vGridButtons.pushBack(cButton);
+  }
 
-  sf::RectangleShape cTwoTile;
-  cTwoTile.setSize(sf::Vector2f(25.0f, 25.0f));
-  cTwoTile.setPosition(sf::Vector2f(cOneTile.getPosition().x + cOneTile.getGlobalBounds().width * 2.0f,
-    cOneTile.getPosition().y));
-  cTwoTile.setFillColor(sf::Color(0, 255, 0, 128));
-  cTwoTile.setOutlineColor(sf::Color::Black);
-  cTwoTile.setOutlineThickness(-1.0f);
-  sf::Text cTwoTileText;
-  cTwoTileText.setFont(cFont);
-  cTwoTileText.setCharacterSize(15);
-  cTwoTileText.setString("2");
-  cTwoTileText.setColor(sf::Color::Black);
-  cTwoTileText.setPosition(cTwoTile.getPosition().x + cTwoTile.getGlobalBounds().width * 0.35f,
-    cTwoTile.getPosition().y + cTwoTile.getGlobalBounds().height * 0.15f);
+  {
+    Point sPrevButtonPos(vGridButtons[0].m_sPosition);
+    Point sPrevButtonSize(vGridButtons[0].m_sSize);
+    Button cButton(Point(sPrevButtonPos.x + sPrevButtonSize.x * 1.5f,
+      sPrevButtonPos.y), Point(25.0f, 25.0f), "1", sf::Color::Red, true);
+
+    vGridButtons.pushBack(cButton);
+  }
+
+  {
+    Point sPrevButtonPos(vGridButtons[1].m_sPosition);
+    Point sPrevButtonSize(vGridButtons[1].m_sSize);
+    Button cButton(Point(sPrevButtonPos.x + sPrevButtonSize.x * 1.5f,
+      sPrevButtonPos.y), Point(25.0f, 25.0f), "2", sf::Color::Green, true);
+
+    vGridButtons.pushBack(cButton);
+  }
+
+  {
+    Point sPrevButtonPos(vGridButtons[2].m_sPosition);
+    Point sPrevButtonSize(vGridButtons[2].m_sSize);
+    Button cButton(Point(sPrevButtonPos.x + sPrevButtonSize.x * 1.5f,
+      sPrevButtonPos.y), Point(25.0f, 25.0f), "3", sf::Color::Blue, true);
+
+    vGridButtons.pushBack(cButton);
+  }
 
   while (cWindow.isOpen())
   {
@@ -333,6 +323,16 @@ int main()
     {
       bDrawGrid = !bDrawGrid;
     }
+
+    for (uint32 i = 0; i < vGridButtons.size(); i++)
+    {
+      if (vGridButtons[i].isClicked(&cWindow))
+      {
+        uint32 uButtonValue = std::atoi(vGridButtons[i].getText().c_str());
+        printf("Value: %u\n", uButtonValue);
+      }
+    }
+
     if (cTextureParametersButton.isClicked(&cWindow) == true)
     {
       cXValue = cX1TextInput.getString();
@@ -385,11 +385,8 @@ int main()
       cWindow.draw(cSelectedTile);
     }
     cWindow.setView(cWindow.getDefaultView());
+    
     //cWindow.clear();
-    /*if (bIsTileSelected == true)
-    {
-      cWindow.draw(cSelectedTile);
-    }*/
     cWindow.draw(cToolPanel);
     cWindow.draw(cDebugText);
 
@@ -401,13 +398,11 @@ int main()
     cTileSizeTextInput.draw(&cWindow);
     cWindow.draw(cTileSizeInfoText);
     cWindow.draw(cWarning);
-    cWindow.draw(cZeroTile);
-    cWindow.draw(cZeroTileText);
-    cWindow.draw(cOneTile);
-    cWindow.draw(cOneTileText);
-    cWindow.draw(cTwoTile);
-    cWindow.draw(cTwoTileText);
     cTextureParametersButton.draw(&cWindow);
+    for (uint32 i = 0; i < vGridButtons.size(); i++)
+    {
+      vGridButtons[i].draw(&cWindow);
+    }
 
     cWindow.display();
     // [DRAW]

@@ -91,7 +91,8 @@ struct Point
 class Button
 {
 public:
-  Button(const Point &sPosition, const Point &sSize, const std::string &cLabel)
+  Button(const Point &sPosition, const Point &sSize, const std::string &cLabel, 
+    const sf::Color &cColor = sf::Color::White, bool bUseOutline = false)
   {
     m_sPosition = sPosition;
     m_sSize = sSize;
@@ -110,6 +111,12 @@ public:
 
     m_cBox.setSize(sf::Vector2f(sSize.x, sSize.y));
     m_cBox.setPosition(sPosition.x, sPosition.y);
+    m_cBox.setFillColor(cColor);
+    if (bUseOutline == true)
+    {
+      m_cBox.setOutlineThickness(-1.0f);
+      m_cBox.setOutlineColor(sf::Color::Black);
+    }
   }
 
   bool isClicked(sf::RenderWindow *pTarget)
@@ -142,9 +149,15 @@ public:
     return false;
   }
 
+  std::string getText() const
+  {
+    return m_cLabel.getString();
+  }
+
   void draw(sf::RenderWindow *pTarget)
   {
     pTarget->draw(m_cBox);
+    m_cLabel.setFont(m_cFont);
     pTarget->draw(m_cLabel);
   }
 

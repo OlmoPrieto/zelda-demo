@@ -34,6 +34,7 @@ public:
       for (unsigned int i = 0; i < m_uCount; i++)
       {
         pPtr->~T();
+        //delete pPtr;
         // TODO: bug here
         pPtr++;
       }
@@ -74,7 +75,9 @@ public:
 
     m_pIterator = m_pVectorBegin + m_uCount;
     //*m_pIterator = element;
-    memcpy(m_pIterator, &element, m_uClassSize);
+    new(m_pVectorBegin + m_uCount)T(element);
+    //memcpy(m_pIterator, &element, m_uClassSize);
+
     m_pIterator = nullptr;
     
     m_uCount++;
@@ -83,7 +86,7 @@ public:
   /*
    *  Quite costly. Reallocation can happen.
    *
-   *  TODO: maybe assert if position >= m_uCount?
+   *  TODO: maybe assert if position >= m_uCount? && do the same as pushBack()
   */
   void insert(const T& element, uint32 position)
   {
@@ -163,7 +166,7 @@ public:
   /*
    *  Should implement exception-throwing system
   */
-  T at(uint32 index) const
+  T& at(uint32 index) const
   {
     if (index < m_uCount)
     {
@@ -202,38 +205,43 @@ private:
       amount = converted_cap;
     }
 
-    T* tmp = m_pVectorBegin;
+    T* pTmp = m_pVectorBegin;
     m_pVectorBegin = nullptr;
     m_pVectorBegin = (T*)malloc(amount * m_uClassSize);
     if (m_pVectorBegin != nullptr)  // assert(m_pVectorBegin == nullptr && "Failed to allocate new memory");
     {
-      memset(m_pVectorBegin, 0, amount * m_uClassSize);
-
-      memcpy(m_pVectorBegin, tmp, m_uClassSize * m_uCount);
-      /*for (uint32 i = 0; i < m_uCount; i++)
+      //memcpy(m_pVectorBegin, tmp, m_uClassSize * m_uCount);
+      
+      T* pTmp2 = pTmp;
+      for (uint32 i = 0; i < m_uCount; i++)
       {
-        T* e = tmp + i;
-        m_pIterator = m_pVectorBegin + i;
-        *m_pIterator = *e;
-        e->~T();
+        new(m_pVectorBegin + i)T(*pTmp2);
+        pTmp2++;
       }
-      m_pIterator = nullptr;*/
-
-      // delete all old copies? Not needed I think.
-
-      free(tmp);
-      tmp = nullptr;
+      
+      for (uint32 i = 0; i < m_uCount; i++)
+      {
+        (pTmp + i)->~T();
+      }
+      free(pTmp);
+      pTmp = nullptr;
+      pTmp2 = nullptr;
 
       m_uCapacity = amount;
 
       return true;
     } else
     {
+      // shouldn't enter here, assert
       m_pVectorBegin = nullptr;
       m_pIterator = nullptr;
-      tmp = nullptr;
+      pTmp = nullptr;
       return false;
     }
+
+    /*m_pVectorBegin = (T*)realloc(m_pVectorBegin, amount * m_uClassSize);
+    m_uCapacity = amount;
+    return true;*/
   }
 
   T* m_pVectorBegin;
