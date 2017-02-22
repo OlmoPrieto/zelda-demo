@@ -35,7 +35,6 @@ public:
       {
         pPtr->~T();
         //delete pPtr;
-        // TODO: bug here
         pPtr++;
       }
     }

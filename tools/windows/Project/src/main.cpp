@@ -36,22 +36,54 @@ Point sGridPosition;
 int uUserTileSize = 0;
 byte* pMatrixPtr = nullptr;
 uint32 uNumMatrixElements = 0;
+Matrix<uint32> cGridMatrix;
+uint32 uGridTileValue = 0;
+uint32 uClickedTileX = 0;
+uint32 uClickedTileY = 0;
 
 void createMatrix()
 {
-  if (pMatrixPtr != nullptr)
+  /*if (pMatrixPtr != nullptr)
   {
     free(pMatrixPtr);
   }
 
   uNumMatrixElements = (uGridWidth / uTileSize) * (uGridHeight / uTileSize);
   pMatrixPtr = (byte*)malloc(uNumMatrixElements);
-  memset(pMatrixPtr, 0, uNumMatrixElements);
+  memset(pMatrixPtr, 0, uNumMatrixElements);*/
+
+  uNumMatrixElements = (uGridWidth / uTileSize) * (uGridHeight / uTileSize);
+  cGridMatrix.setSize((uGridWidth / uTileSize), (uGridHeight / uTileSize));
 }
 
-void setMatrixElement(uint32 uX, uint32 uY, byte byValue)
+void setTileColorInGrid(uint32 uX, uint32 uY, const sf::Color& cColor)
 {
-  pMatrixPtr[uX + uNumMatrixElements * uY] = byValue;
+  for (uint32 i = uY * uTileSize; i < (uY * uTileSize) + uTileSize; i++)
+  {
+    for (uint32 j = uX * uTileSize; j < (uX * uTileSize) + uTileSize; j++)
+    {
+      int p = (j + (uGridWidth + 1) * i) * 4;
+
+      pGridPtr[p + 0] = cColor.r;
+      pGridPtr[p + 1] = cColor.g;
+      pGridPtr[p + 2] = cColor.b;
+
+      byte byA = cColor.a;
+      if ((char)byA - 128 > 0)
+      {
+        byA -= 128;
+      } else if (byA == 0)
+      {
+        byA = 0;
+      } else 
+      {
+        byA = 64;
+      }
+      pGridPtr[p + 3] = byA;
+    }
+  }
+
+  cGridTexture.update(pGridPtr);
 }
 
 void createGrid(uint32 uBeginX, uint32 uBeginY, uint32 uWidth, uint32 uHeight)
@@ -62,13 +94,14 @@ void createGrid(uint32 uBeginX, uint32 uBeginY, uint32 uWidth, uint32 uHeight)
   uint32 uDivider = 0;
   if (uUserTileSize == -1)
   {
-    uGridHeight <= uGridWidth ? uDivider = uGridHeight : uDivider = uGridWidth;
+    /*uGridHeight <= uGridWidth ? uDivider = uGridHeight : uDivider = uGridWidth;
     bool bIsDivisor = (uGridWidth % uDivider == 0 && uGridHeight % uDivider == 0);
     while (bIsDivisor == false)
     {
       uDivider--;
       bIsDivisor = (uGridWidth % uDivider == 0 && uGridHeight % uDivider == 0);
-    }
+    }*/
+    uDivider = greatestCommonDivider(uGridWidth, uGridHeight);
 
     uTileSize = uDivider;
   } else
@@ -221,7 +254,7 @@ int main()
 
     vGridButtons.pushBack(cButton);
   }
-
+  
   while (cWindow.isOpen())
   {
     // [INPUT]
@@ -298,22 +331,38 @@ int main()
         int iYPos = int(((float(uWindowHeight) - (cView.getSize().y)) / 2.0f) + (sMousePos.y / (uWindowHeight / cView.getSize().y)));
 
         // indices in the collision matix
-        int uTileXIndex = (iXPos - int(sImagePos.x)) / int(uTileSize);
-        int uTileYIndex = (iYPos - int(sImagePos.y)) / int(uTileSize);
+        int iTileXIndex = (iXPos - int(sImagePos.x)) / int(uTileSize);
+        int iTileYIndex = (iYPos - int(sImagePos.y)) / int(uTileSize);
+
+        if (iTileXIndex >= 0)
+        {
+          uClickedTileX = (uint32)iTileXIndex;
+        }
+        if (iTileYIndex >= 0)
+        {
+          uClickedTileY = (uint32)iTileYIndex;
+        }
         
         cDebugText.setString(std::to_string(sImagePos.x) + " , " + std::to_string(sImagePos.y) + "\n" + 
           std::to_string(iXPos - int(sImagePos.x)) + " , " + std::to_string(iYPos - int(sImagePos.y)) + "\n" + 
-          std::to_string(uTileXIndex) + " , " + std::to_string(uTileYIndex) + "\n" + 
+          std::to_string(iTileXIndex) + " , " + std::to_string(iTileYIndex) + "  :  " + std::to_string(cGridMatrix.getData(uClickedTileX, uClickedTileY)) + "\n" +
           std::to_string(iXPos) + " , " + std::to_string(iYPos) + "\n");
 
-        cSelectedTile.setPosition(((uTileXIndex * uTileSize) + sImagePos.x), (uTileYIndex * uTileSize) + sImagePos.y);
+        cSelectedTile.setPosition(((iTileXIndex * uTileSize) + sImagePos.x), (iTileYIndex * uTileSize) + sImagePos.y);
         bIsTileSelected = true;
       }
     }
 
-    if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Right) && bIsTileSelected == true)
+    if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Right))
     {
-      if (sf::Mouse::getPosition(cWindow).x < 1000)
+      if (bIsTileSelected == true)
+      {
+        cGridMatrix.setData(uClickedTileX, uClickedTileY, uGridTileValue);
+        sf::Color cColor = vGridButtons[uGridTileValue].m_cBox.getFillColor();
+        setTileColorInGrid(uClickedTileX, uClickedTileY, cColor);
+      }
+
+      if (sf::Mouse::getPosition(cWindow).x < 1000 && bIsTileSelected == true)
       {
         bIsTileSelected = false;
       }
@@ -328,8 +377,7 @@ int main()
     {
       if (vGridButtons[i].isClicked(&cWindow))
       {
-        uint32 uButtonValue = std::atoi(vGridButtons[i].getText().c_str());
-        printf("Value: %u\n", uButtonValue);
+        uGridTileValue = std::atoi(vGridButtons[i].getText().c_str());
       }
     }
 
@@ -349,6 +397,14 @@ int main()
 
       if (uX2Value > 0 && uY2Value > 0 && uUserTileSize != 0)
       {
+        createGrid(uX1Value, uY1Value, uX2Value, uY2Value);
+      } else // check this
+      {
+        uX1Value = 0;
+        uY1Value = 0;
+        uX2Value = cBackgroundSprite.getGlobalBounds().width;
+        uY2Value = cBackgroundSprite.getGlobalBounds().height;
+        uUserTileSize = greatestCommonDivider(uX2Value, uY2Value);
         createGrid(uX1Value, uY1Value, uX2Value, uY2Value);
       }
     }

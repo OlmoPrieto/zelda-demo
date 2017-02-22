@@ -21,6 +21,22 @@ static inline T lerp(const T& cA, const T& cB, float fAlpha)
   return (cA + fAlpha * (cB - cA));
 }
 
+uint32 greatestCommonDivider(uint32 uFirst, uint32 uSecond)
+{
+  uint32 uDivider = 0;
+
+  uSecond <= uFirst ? uDivider = uSecond : uDivider = uFirst;
+
+  bool bIsDivisor = (uFirst % uDivider == 0 && uSecond % uDivider == 0);
+  while (bIsDivisor == false)
+  {
+    uDivider--;
+    bIsDivisor = (uFirst % uDivider == 0 && uSecond % uDivider == 0);
+  }
+
+  return uDivider;
+}
+
 struct Point
 {
   Point() : x(0.0f), y(0.0f) {}
@@ -598,6 +614,136 @@ public:
   byte m_byAlphaLerp;
   bool m_bHasFocus;
   bool m_bBlinkDown;
+};
+
+template <class T>
+class Matrix
+{
+public:
+  Matrix()
+  {
+    m_pMatrixPtr = nullptr;
+    m_uWidth = 0;
+    m_uHeight = 0;
+  }
+
+  Matrix(uint32 uWidth, uint32 uHeight, bool bIdentity = false)
+  {
+    m_uWidth = uWidth;
+    m_uHeight = uHeight;
+
+    m_pMatrixPtr = (T*)malloc(uWidth * uHeight * sizeof(T));
+
+    T* pPtr = m_pMatrixPtr;
+    for (uint32 i = 0; i < uHeight; i++)
+    {
+      for (uint32 j = 0; j < uWidth; j++)
+      {
+        *pPtr = 0;
+        if (bIdentity == true)
+        {
+          if (i == j)
+          {
+            *pPtr = 1;
+          }
+        }
+
+        pPtr++;
+      }
+    }
+
+    pPtr = nullptr;
+  } // Matrix(w,h,b);
+
+  ~Matrix()
+  {
+    if (m_pMatrixPtr != nullptr)
+    {
+      free(m_pMatrixPtr);
+    }
+  }
+
+  void setData(uint32 uIndex, const T& cValue)
+  {
+    m_pMatrixPtr[uIndex] = cValue;
+  }
+
+  void setData(uint32 uX, uint32 uY, const T& cValue)
+  {
+    m_pMatrixPtr[uX + m_uWidth * uY] = cValue;
+  }
+
+  T getData(uint32 uIndex) const
+  {
+    if (m_pMatrixPtr == nullptr)
+    {
+      return 0;
+    } else
+    {
+      return m_pMatrixPtr[uIndex];
+    }
+  }
+
+  T getData(uint32 uX, uint32 uY) const
+  {
+    if (m_pMatrixPtr == nullptr)
+    {
+      return 0;
+    } else
+    {
+      return m_pMatrixPtr[uX + m_uWidth * uY];
+    }
+  }
+
+  void cleanMatrix()
+  {
+    memset(m_pMatrixPtr, 0, m_uWidth * m_uHeight * sizeof(T));
+  }
+
+  void setIdentity()
+  {
+    T* pPtr = m_pMatrixPtr;
+    for (uint32 i = 0; i < m_uHeight; i++)
+    {
+      for (uint32 j = 0; j < m_uWidth; j++)
+      {
+        *pPtr = 0;
+
+        if (i == j)
+        {
+          *pPtr = 1;
+        }
+
+        pPtr++;
+      }
+    }
+
+    pPtr = nullptr;
+  }
+
+  void setSize(uint32 uWidth, uint32 uHeight)
+  {
+    if (m_pMatrixPtr != nullptr)
+    {
+      free(m_pMatrixPtr);
+    }
+
+    m_uWidth = uWidth;
+    m_uHeight = uHeight;
+
+    m_pMatrixPtr = (T*)malloc(uWidth * uHeight * sizeof(T));
+
+    memset(m_pMatrixPtr, 0, uWidth * uHeight * sizeof(T));
+  }
+
+  uint32 getNumElements() const
+  {
+    return (m_uWidth * m_uHeight);
+  }
+
+  T* m_pMatrixPtr;
+  uint32 m_uWidth;
+  uint32 m_uHeight;
 };
 
 #endif // __MISC_H__
