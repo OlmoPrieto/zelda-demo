@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 
 #include "misc.h"
 #include "vector.h"
@@ -34,12 +35,12 @@ sf::Texture cGridTexture;
 sf::Sprite cGridSprite;
 Point sGridPosition;
 int uUserTileSize = 0;
-byte* pMatrixPtr = nullptr;
 uint32 uNumMatrixElements = 0;
 Matrix<uint32> cGridMatrix;
 uint32 uGridTileValue = 0;
 uint32 uClickedTileX = 0;
 uint32 uClickedTileY = 0;
+bool bIsGridSet = false;
 
 void createMatrix()
 {
@@ -146,6 +147,55 @@ void createGrid(uint32 uBeginX, uint32 uBeginY, uint32 uWidth, uint32 uHeight)
 
   // Now that everything is set, create the collision matrix
   createMatrix();
+
+  bIsGridSet = true;
+}
+
+void createMatrixFile(const std::string& cFileName)
+{
+  /*std::ofstream cFile("resources/" + cFileName);
+  if (cFile.is_open() == true)
+  {
+    
+
+    cFile.close();
+  }*/
+  FILE* pFile = fopen(std::string("resources/" + cFileName).c_str(), "w");
+  if (pFile != nullptr)
+  {
+    fwrite(&cGridMatrix.m_uWidth, sizeof(uint32), 1, pFile);
+    fwrite(&cGridMatrix.m_uHeight, sizeof(uint32), 1, pFile);
+    fwrite(cGridMatrix.m_pMatrixPtr, sizeof(byte), cGridMatrix.m_uWidth * cGridMatrix.m_uHeight, pFile);
+
+    fclose(pFile);
+  }
+}
+
+void readFile(const std::string& cFileName)
+{
+  FILE* pFile = fopen(std::string("resources/" + cFileName).c_str(), "r");
+  if (pFile != nullptr)
+  {
+    uint32 uWidth;
+    fread(&uWidth, sizeof(uint32), 1, pFile);
+    uint32 uHeight;
+    fread(&uHeight, sizeof(uint32), 1, pFile);
+
+    byte* pPtr = (byte*)malloc(uWidth * uHeight);
+    fread(pPtr, 1, uWidth * uHeight, pFile);
+
+    for (uint32 i = 0; i < uHeight; i++)
+    {
+      for (uint32 j = 0; j < uWidth; j++)
+      {
+        printf("%u ", pPtr[j + uWidth * i]);
+      }
+      printf("\n");
+    }
+
+    free(pPtr);
+    fclose(pFile);
+  }
 }
 
 int main()
@@ -255,6 +305,15 @@ int main()
     vGridButtons.pushBack(cButton);
   }
   
+  Button cWriteButton(Point(cGridButton.m_sPosition.x + cGridButton.m_sSize.x * 1.25f, 
+    cGridButton.m_sPosition.y), Point(cGridButton.m_sSize.x + cGridButton.m_sSize.x * 0.25f, cGridButton.m_sSize.y),
+      "WRITE TO FILE", sf::Color(255, 255, 0, 255));
+
+  Button cReadButton(Point(cGridButton.m_sPosition.x + cGridButton.m_sSize.x * 2.6f,
+    cGridButton.m_sPosition.y), Point(cGridButton.m_sSize.x + cGridButton.m_sSize.x * 0.25f, cGridButton.m_sSize.y),
+    "READ FROM FILE", sf::Color(255, 128, 0, 255));
+
+  // 
   while (cWindow.isOpen())
   {
     // [INPUT]
@@ -355,7 +414,7 @@ int main()
 
     if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Right))
     {
-      if (bIsTileSelected == true)
+      if (bIsTileSelected == true && bIsGridSet == true)
       {
         cGridMatrix.setData(uClickedTileX, uClickedTileY, uGridTileValue);
         sf::Color cColor = vGridButtons[uGridTileValue].m_cBox.getFillColor();
@@ -408,6 +467,15 @@ int main()
         createGrid(uX1Value, uY1Value, uX2Value, uY2Value);
       }
     }
+    if (cWriteButton.isClicked(&cWindow) == true)
+    {
+      createMatrixFile("grid1.gr");
+    }
+    if (cReadButton.isClicked(&cWindow) == true)
+    {
+      readFile("grid1.gr");
+    }
+
     cX1TextInput.isClicked(&cWindow);
     cX1TextInput.processInput(&cWindow);
     cY1TextInput.isClicked(&cWindow);
@@ -459,6 +527,8 @@ int main()
     {
       vGridButtons[i].draw(&cWindow);
     }
+    cWriteButton.draw(&cWindow);
+    cReadButton.draw(&cWindow);
 
     cWindow.display();
     // [DRAW]
@@ -467,10 +537,6 @@ int main()
   if (pGridPtr != nullptr)
   {
     free(pGridPtr);
-  }
-  if (pMatrixPtr != nullptr)
-  {
-    free(pMatrixPtr);
   }
 
   return 0;
