@@ -115,7 +115,8 @@ public:
     m_bPressed = false;
     m_bCanBePressedAgain = true;
 
-    if (m_cFont.loadFromFile("../../../Project/resources/arial.ttf") == false)
+    //if (m_cFont.loadFromFile("../../../Project/resources/arial.ttf") == false)
+    if (m_cFont.loadFromFile("resources/fonts/arial.ttf") == false)
     {
       printf("Failed to load font\n");
     }
@@ -205,7 +206,8 @@ public:
     m_bHasFocus = false;
     m_bBlinkDown = true;
 
-    if (m_cFont.loadFromFile("../../../Project/resources/arial.ttf") == false)
+    //if (m_cFont.loadFromFile("../../../Project/resources/arial.ttf") == false)
+    if (m_cFont.loadFromFile("resources/fonts/arial.ttf") == false)
     {
       printf("Failed to load font\n");
     }

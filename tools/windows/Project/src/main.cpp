@@ -36,7 +36,7 @@ sf::Sprite cGridSprite;
 Point sGridPosition;
 int uUserTileSize = 0;
 uint32 uNumMatrixElements = 0;
-Matrix<uint32> cGridMatrix;
+Matrix<byte> cGridMatrix;
 uint32 uGridTileValue = 0;
 uint32 uClickedTileX = 0;
 uint32 uClickedTileY = 0;
@@ -163,6 +163,7 @@ void createMatrixFile(const std::string& cFileName)
   FILE* pFile = fopen(std::string("resources/" + cFileName).c_str(), "w");
   if (pFile != nullptr)
   {
+    fwrite(&uTileSize, sizeof(uint32), 1, pFile);
     fwrite(&cGridMatrix.m_uWidth, sizeof(uint32), 1, pFile);
     fwrite(&cGridMatrix.m_uHeight, sizeof(uint32), 1, pFile);
     fwrite(cGridMatrix.m_pMatrixPtr, sizeof(byte), cGridMatrix.m_uWidth * cGridMatrix.m_uHeight, pFile);
@@ -176,6 +177,8 @@ void readFile(const std::string& cFileName)
   FILE* pFile = fopen(std::string("resources/" + cFileName).c_str(), "r");
   if (pFile != nullptr)
   {
+    uint32 uReadTileSize;
+    fread(&uReadTileSize, sizeof(uint32), 1, pFile);
     uint32 uWidth;
     fread(&uWidth, sizeof(uint32), 1, pFile);
     uint32 uHeight;
@@ -198,12 +201,20 @@ void readFile(const std::string& cFileName)
   }
 }
 
-int main()
+int main(int argc, char** argv)
 {
+  std::string cBackgroundTextureFileName = "../../../Project/resources/south-hyrule-field_background.png";
+  if (argc > 1)
+  {
+    //printf("\nArguments: %d\n\n %s\n\n", argc, *(argv + 1));
+    cBackgroundTextureFileName = argv[1];
+  }
+
   cWindow.create(sf::VideoMode(uWindowWidth, uWindowHeight), "WINDOW");
   cView.reset(sf::FloatRect(0.0f, 0.0f, (float)uWindowWidth, (float)uWindowHeight));
 
-  cBackgroundImage.loadFromFile("../../../Project/resources/south-hyrule-field_background.png"); 
+  //cBackgroundImage.loadFromFile("../../../Project/resources/south-hyrule-field_background.png"); 
+  cBackgroundImage.loadFromFile(cBackgroundTextureFileName);
   cBackgroundTexture.loadFromImage(cBackgroundImage);
   cBackgroundSprite.setTexture(cBackgroundTexture);
 
@@ -255,7 +266,8 @@ int main()
   Button cTextureParametersButton(Point(uWindowWidth - uWindowWidth * 0.04f, 
     cWarningPos.y), Point(30.0f, 25.0f), "SET");
 
-  if (cFont.loadFromFile("../../../Project/resources/arial.ttf") == false)
+  //if (cFont.loadFromFile("../../../Project/resources/arial.ttf") == false)
+  if (cFont.loadFromFile("resources/fonts/arial.ttf") == false)
   {
     printf("Failed to load font\n");
   }
