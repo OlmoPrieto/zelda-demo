@@ -19,8 +19,10 @@ Link::Link() : m_cStandingUpAnimation(&m_cSprite, 0.15f, false),
 {
   m_fNoInputTime = 0.0f;
   m_eFacingDirection = FacingDirection::Down;
+  m_eState = State::Idle;
   m_pCurrentAnimation = nullptr;
   m_bStopped = true;
+  m_bHadInput = false;
   m_cChrono.start();
 
   sf::Image cLinkSheet;
@@ -396,7 +398,7 @@ Link::Link() : m_cStandingUpAnimation(&m_cSprite, 0.15f, false),
   //
 
   //m_cSprite.setTexture(m_cLinkDownTexture);
-  m_cSprite.setPosition(100.0f, 100.0f);
+  m_cSprite.setPosition(100.0f, 85.0f);
   m_cSprite.setScale(10.0f, 10.0f);
 }
 
@@ -412,51 +414,51 @@ sf::Sprite* Link::getSprite()
 
 void Link::processInput(const sf::Keyboard::Key &eKey)
 {
-  bool bIsInput = true;
+  m_bHadInput = true;
   m_bStopped = false;
 
   if (eKey == sf::Keyboard::Key::Up)
   {
     m_eFacingDirection = Up;
     //m_pCurrentAnimation = &m_cStandingUpAnimation;
-    if (m_pCurrentAnimation != &m_cWalkUpAnimation)
+    /*if (m_pCurrentAnimation != &m_cWalkUpAnimation)
     {
       m_pCurrentAnimation = &m_cWalkUpAnimation;
       m_pCurrentAnimation->play();
-    }
+    }*/
   } else if (eKey == sf::Keyboard::Key::Left)
   {
     m_eFacingDirection = Left;
     //m_pCurrentAnimation = &m_cStandingLeftAnimation;
-    if (m_pCurrentAnimation != &m_cWalkLeftAnimation)
+    /*if (m_pCurrentAnimation != &m_cWalkLeftAnimation)
     {
       m_pCurrentAnimation = &m_cWalkLeftAnimation;
       m_pCurrentAnimation->play();
-    }
+    }*/
   } else if (eKey == sf::Keyboard::Key::Down)
   {
     m_eFacingDirection = Down;
-    if (m_pCurrentAnimation != &m_cWalkDownAnimation)
+    /*if (m_pCurrentAnimation != &m_cWalkDownAnimation)
     {
       m_pCurrentAnimation = &m_cWalkDownAnimation;
       m_pCurrentAnimation->play();
-    }
+    }*/
   } else if (eKey == sf::Keyboard::Key::Right)
   {
     m_eFacingDirection = Right;
     //m_pCurrentAnimation = &m_cStandingRightAnimation;
-    if (m_pCurrentAnimation != &m_cWalkRightAnimation)
+    /*if (m_pCurrentAnimation != &m_cWalkRightAnimation)
     {
       m_pCurrentAnimation = &m_cWalkRightAnimation;
       m_pCurrentAnimation->play();
-    }
+    }*/
   } else if (eKey == sf::Keyboard::Key::Unknown)
   {
-    bIsInput = false;
+    m_bHadInput = false;
     m_bStopped = true;
   }
 
-  if (bIsInput == false)
+  if (m_bHadInput == false)
   {
     m_cChrono.stop();
     static float sfCurrentTime = m_fNoInputTime;
@@ -469,13 +471,38 @@ void Link::processInput(const sf::Keyboard::Key &eKey)
   }
 }
 
-void Link::update(float fDeltaTime)
+void Link::updateStateMachine()
+{
+  switch (m_eState)
+  {
+  case Idle:
+  {
+    if (m_bHadInput == true)
+    {
+      m_eState = Moving;
+    } else
+    {
+      updateIdleState();
+    }
+  }
+  case Moving:
+  {
+    if (m_bHadInput == false)
+    {
+      m_eState = Idle;
+    } else
+    {
+      updateMovingState();
+    }
+  }
+  }
+}
+
+void Link::updateIdleState()
 {
   bool bPlayIdleAnimation = false;
   bool bChangedAnimation = false;
   Animation* pLastAnimation = nullptr;
-
-  m_pCurrentAnimation->update(fDeltaTime);
 
   if (m_fNoInputTime >= 2.5f)
   {
@@ -487,12 +514,12 @@ void Link::update(float fDeltaTime)
   {
   case Up:
   {
-    if (bPlayIdleAnimation == true)
+    /*if (bPlayIdleAnimation == true)
     {
       pLastAnimation = m_pCurrentAnimation;
-      m_pCurrentAnimation = &m_cStandingUpAnimation;
+      m_pCurrentAnimation = &m_cIdleUpAnimation;
       bChangedAnimation = true;
-    } else if (m_bStopped == true)
+    } else*/
     {
       pLastAnimation = m_pCurrentAnimation;
       m_pCurrentAnimation = &m_cStandingUpAnimation;
@@ -508,7 +535,7 @@ void Link::update(float fDeltaTime)
       pLastAnimation = m_pCurrentAnimation;
       m_pCurrentAnimation = &m_cIdleLeftAnimation;
       bChangedAnimation = true;
-    } else if (m_bStopped == true && m_cIdleLeftAnimation.isPlaying() == false)
+    } else if (m_cIdleLeftAnimation.isPlaying() == false)
     {
       pLastAnimation = m_pCurrentAnimation;
       m_pCurrentAnimation = &m_cStandingLeftAnimation;
@@ -524,7 +551,7 @@ void Link::update(float fDeltaTime)
       pLastAnimation = m_pCurrentAnimation;
       m_pCurrentAnimation = &m_cIdleDownAnimation;
       bChangedAnimation = true;
-    } else if (m_bStopped == true && m_cIdleDownAnimation.isPlaying() == false)
+    } else if (m_cIdleDownAnimation.isPlaying() == false)
     {
       pLastAnimation = m_pCurrentAnimation;
       m_pCurrentAnimation = &m_cStandingDownAnimation;
@@ -540,7 +567,7 @@ void Link::update(float fDeltaTime)
       pLastAnimation = m_pCurrentAnimation;
       m_pCurrentAnimation = &m_cIdleRightAnimation;
       bChangedAnimation = true;
-    } else if (m_bStopped == true && m_cIdleRightAnimation.isPlaying() == false)
+    } else if (m_cIdleRightAnimation.isPlaying() == false)
     {
       pLastAnimation = m_pCurrentAnimation;
       m_pCurrentAnimation = &m_cStandingRightAnimation;
@@ -556,4 +583,83 @@ void Link::update(float fDeltaTime)
     pLastAnimation->stop();
     m_pCurrentAnimation->play();
   }
+}
+
+void Link::updateMovingState()
+{
+  bool bChangedAnimation = false;
+  Animation* pLastAnimation = nullptr;
+
+  switch (m_eFacingDirection)
+  {
+  case Up:
+  {
+    if (m_bStopped == false)
+    {
+      if (m_pCurrentAnimation != &m_cWalkUpAnimation)
+      {
+        pLastAnimation = m_pCurrentAnimation;
+        m_pCurrentAnimation = &m_cWalkUpAnimation;
+        bChangedAnimation = true;
+      }
+    }
+
+    break;
+  }
+  case Left:
+  {
+    if (m_bStopped == false)
+    {
+      if (m_pCurrentAnimation != &m_cWalkLeftAnimation)
+      {
+        pLastAnimation = m_pCurrentAnimation;
+        m_pCurrentAnimation = &m_cWalkLeftAnimation;
+        bChangedAnimation = true;
+      }
+    }
+
+    break;
+  }
+  case Down:
+  {
+    if (m_bStopped == false)
+    {
+      if (m_pCurrentAnimation != &m_cWalkDownAnimation)
+      {
+        pLastAnimation = m_pCurrentAnimation;
+        m_pCurrentAnimation = &m_cWalkDownAnimation;
+        bChangedAnimation = true;
+      }
+    }
+
+    break;
+  }
+  case Right:
+  {
+    if (m_bStopped == false)
+    {
+      if (m_pCurrentAnimation != &m_cWalkRightAnimation)
+      {
+        pLastAnimation = m_pCurrentAnimation;
+        m_pCurrentAnimation = &m_cWalkRightAnimation;
+        bChangedAnimation = true;
+      }
+    }
+
+    break;
+  }
+  } // switch()
+
+  if (bChangedAnimation == true)
+  {
+    pLastAnimation->stop();
+    m_pCurrentAnimation->play();
+  }
+}
+
+void Link::update(float fDeltaTime)
+{
+  updateStateMachine();
+
+  m_pCurrentAnimation->update(fDeltaTime);
 }

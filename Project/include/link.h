@@ -19,14 +19,24 @@ public:
     Up, Left, Down, Right
   };
 
+  enum State
+  {
+    Idle, Moving
+  };
+
   sf::Sprite* getSprite();
 
   void processInput(const sf::Keyboard::Key &eKey);
   void update(float fDeltaTime);
 
 private:
+  void updateStateMachine();
+  void updateIdleState();
+  void updateMovingState();
+
   float m_fNoInputTime;
   FacingDirection m_eFacingDirection;
+  State m_eState;
   Animation* m_pCurrentAnimation;
   Animation m_cStandingUpAnimation;
   Animation m_cStandingLeftAnimation;
@@ -43,6 +53,7 @@ private:
   sf::Sprite m_cSprite;
   sf::Texture m_cSpriteSheetTexture;
   bool m_bStopped;
+  bool m_bHadInput;
 };
 
 #endif // __LINK_H__

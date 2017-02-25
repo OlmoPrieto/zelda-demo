@@ -105,15 +105,17 @@ public:
       }
 
       m_pIterator = m_pVectorBegin + position;
-      *m_pIterator = element;
-      m_uCount++;
+      //*m_pIterator = element;
+      new(m_pIterator)T(element);
       m_pIterator = nullptr;
+      m_uCount++;
 
       for (uint32 i = position + 1; i < m_uCount; i++)
       {
         T e = aux[i - position - 1];
         m_pIterator = m_pVectorBegin + i;
-        *m_pIterator = e;
+        //*m_pIterator = e;
+        new(m_pIterator)T(e);
       }
       m_pIterator = nullptr;
     }
