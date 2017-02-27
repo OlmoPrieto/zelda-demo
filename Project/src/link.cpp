@@ -4,7 +4,6 @@
 
 #include <cstdio>
 
-
 Link::Link() : m_cStandingUpAnimation(&m_cSprite, 0.15f, false),
   m_cStandingLeftAnimation(&m_cSprite, 0.15f, false),
   m_cStandingDownAnimation(&m_cSprite, 0.15f, false),
@@ -18,7 +17,9 @@ Link::Link() : m_cStandingUpAnimation(&m_cSprite, 0.15f, false),
   m_cWalkRightAnimation(&m_cSprite, 0.07f, true)
 {
   m_fNoInputTime = 0.0f;
-  m_fSpeed = 0.8f;  // pixels/s ??
+  m_fSpeed = 80.8f;  // pixels/s ??
+  m_uWindowWidth = 0;
+  m_uWindowHeight = 0;
   m_vFacingDirections.reserve(4);
   m_vFacingDirections.pushBack(false);  // facing up
   m_vFacingDirections.pushBack(false);  // facing left
@@ -30,6 +31,7 @@ Link::Link() : m_cStandingUpAnimation(&m_cSprite, 0.15f, false),
   m_bStopped = true;
   m_bHadInput = false;
   m_cChrono.start();
+  m_pCurrentLevel = nullptr;
 
   sf::Image cLinkSheet;
   bool opened = cLinkSheet.loadFromFile("resources/link_sheet.png");
@@ -428,6 +430,7 @@ void Link::processInput(/*const sf::Keyboard::Key &eKey*/sf::RenderWindow* pWind
   if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up))
   {
     eKey = sf::Keyboard::Key::Up;
+    m_eFacingDirection = Up;
     m_vFacingDirections[0] = true;
   } else
   {
@@ -436,6 +439,7 @@ void Link::processInput(/*const sf::Keyboard::Key &eKey*/sf::RenderWindow* pWind
   if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left))
   {
     eKey = sf::Keyboard::Key::Left;
+    m_eFacingDirection = Left;
     m_vFacingDirections[1] = true;
   } else
   {
@@ -444,6 +448,7 @@ void Link::processInput(/*const sf::Keyboard::Key &eKey*/sf::RenderWindow* pWind
   if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down))
   {
     eKey = sf::Keyboard::Key::Down;
+    m_eFacingDirection = Down;
     m_vFacingDirections[2] = true;
   } else
   {
@@ -452,6 +457,7 @@ void Link::processInput(/*const sf::Keyboard::Key &eKey*/sf::RenderWindow* pWind
   if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right))
   {
     eKey = sf::Keyboard::Key::Right;
+    m_eFacingDirection = Right;
     m_vFacingDirections[3] = true;
   } else
   {
@@ -744,6 +750,19 @@ void Link::updateMovingState(float fDeltaTime)
   sf::Vector2f cPosition = m_cSprite.getPosition();
   m_cSprite.setPosition(cPosition.x + m_cVelocity.x * m_fSpeed * fDeltaTime, 
     cPosition.y + m_cVelocity.y * m_fSpeed * fDeltaTime);
+   
+  if ((uint32)(m_cSprite.getPosition().x) >= (m_uWindowWidth / 2))
+  { 
+    // TODO: add half the width to the position above
+    //m_cSprite.setPosition(cPosition);
+    m_pCurrentLevel->m_cView.move(m_cVelocity.x * m_fSpeed * fDeltaTime, 0.0f);
+  }
+  if ((uint32)(m_cSprite.getPosition().y) >= (m_uWindowHeight / 2))
+  { 
+    // TODO: add half the height to the position above
+    //m_cSprite.setPosition(cPosition);
+    m_pCurrentLevel->m_cView.move(0.0f, m_cVelocity.y * m_fSpeed * fDeltaTime);
+  }
 }
 
 void Link::update(float fDeltaTime)
@@ -751,4 +770,18 @@ void Link::update(float fDeltaTime)
   updateStateMachine(fDeltaTime);
 
   m_pCurrentAnimation->update(fDeltaTime);
+}
+
+void Link::setLevel(Level* pCurrentLevel)
+{
+  m_pCurrentLevel = pCurrentLevel;
+  m_pCurrentLevel->m_cViewPos.x = 100.0f;
+  m_pCurrentLevel->m_cViewPos.y = 80.0f;
+}
+
+void Link::setWindowParameters(sf::RenderWindow* pWindow)
+{
+  // TODO: that "magic number" is the zoom to the view. Do it right
+  m_uWindowWidth = pWindow->getSize().x * 0.5f;
+  m_uWindowHeight = pWindow->getSize().y * 0.5f;
 }

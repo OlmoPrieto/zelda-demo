@@ -26,12 +26,19 @@ int main()
 
   Link cLink;
   Level cLevel;
+  
+  cLink.setLevel(&cLevel);
+  cLink.setWindowParameters(&cWindow);
+  
+  cLevel.setWindowRef(&cWindow);
 
   Point sViewPos(0.0f, 0.0f);
-  sf::View cView;
-  cView.reset(sf::FloatRect(0.0f, 0.0f, 800.0f, 600.0f));
+  //sf::View cView;
+  //cView.reset(sf::FloatRect(0.0f, 0.0f, 800.0f, 600.0f));
+  //cView.zoom(0.5f);
+  //cView.move(-(800.0f * 0.25f), -(600.0f * 0.25f));
   //cView.setViewport(sf::FloatRect(0.0f, 0.0f, 1.0f, 1.0f));
-  cWindow.setView(cView);
+  //cWindow.setView(cView);
 
   while (cWindow.isOpen())
   {
@@ -66,15 +73,15 @@ int main()
     {
       eKey = sf::Keyboard::Key::Right;
     }*/
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D))
+    /*if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D))
     {
       if (sViewPos.x + cView.getSize().x < cLevel.getWidth())
       {
-        cView.move(0.01f, 0.0f);
-        sViewPos.move(0.01f, 0.0f);
+        cView.move(0.016f * 80.8f, 0.0f);
+        //sViewPos.move(0.016f * 80.8f, 0.0f);
         cWindow.setView(cView);
       }
-    }
+    }*/
 
     cLink.processInput(&cWindow);
     // [INPUT]
@@ -86,6 +93,8 @@ int main()
     // [DRAW]
     cWindow.clear(sf::Color(64, 64, 64, 255));
     //
+    // not the most efficient thing, no need to set it every frame
+    cWindow.setView(cLevel.m_cView);
     cWindow.draw(*cLevel.getSprite());
     cWindow.draw(*cLink.getSprite());
     //

@@ -1,12 +1,11 @@
 #ifndef __LINK_H__
 #define __LINK_H__
 
-#include <unordered_map>
-
 #include <SFML/Graphics.hpp>
 
 #include "animation.h"
 #include "chrono.h"
+#include "level.h"
 #include "vectors.h"
 
 class Link
@@ -30,6 +29,9 @@ public:
   void processInput(/*const sf::Keyboard::Key &eKey*/
     sf::RenderWindow* pWindow);
   void update(float fDeltaTime);
+  
+  void setLevel(Level* pCurrentLevel);
+  void setWindowParameters(sf::RenderWindow* pWindow);
 
 private:
   void updateStateMachine(float fDeltaTime);
@@ -38,6 +40,8 @@ private:
 
   float m_fNoInputTime;
   float m_fSpeed;
+  uint32 m_uWindowWidth;
+  uint32 m_uWindowHeight;
   elm::vector<bool> m_vFacingDirections;
   FacingDirection m_eFacingDirection;
   State m_eState;
@@ -57,6 +61,7 @@ private:
   Vector2D m_cVelocity;
   sf::Sprite m_cSprite;
   sf::Texture m_cSpriteSheetTexture;
+  Level* m_pCurrentLevel;
   bool m_bStopped;
   bool m_bHadInput;
 };

@@ -3,14 +3,12 @@
 
 #include <SFML/Graphics.hpp>
 
-typedef unsigned int uint32;
+#include <string>
 
-//struct Point
-//{
-//  Point(float x_, float y_) : x(x_), y(y_) {}
-//  float x;
-//  float y;
-//};
+#include "utils.h"
+
+typedef unsigned int uint32;
+typedef unsigned char byte;
 
 class Level
 {
@@ -21,10 +19,22 @@ public:
   sf::Sprite* getSprite();
   uint32 getWidth() const;
   uint32 getHeight() const;
+  
+  void setWindowRef(sf::RenderWindow* pWindow);
+  
+  byte getTileValue(uint32 uX, uint32 uY) const;
+  
+  sf::View m_cView;
+  sf::Vector2f m_cViewPos;
 
 private:
+  bool loadGridFile(const std::string& cFileName);
+
   uint32 m_uMapWidth;
   uint32 m_uMapHeight;
+  uint32 m_uTileSize;
+  sf::RenderWindow* m_pWindowRef;
+  Utils::Matrix<byte> m_cGridMatrix;
   sf::Texture m_cMapTexture;
   sf::Sprite m_cMapSprite;
 };
