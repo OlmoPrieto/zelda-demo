@@ -7,6 +7,7 @@
 
 #include "animation.h"
 #include "chrono.h"
+#include "vectors.h"
 
 class Link
 {
@@ -26,15 +27,18 @@ public:
 
   sf::Sprite* getSprite();
 
-  void processInput(const sf::Keyboard::Key &eKey);
+  void processInput(/*const sf::Keyboard::Key &eKey*/
+    sf::RenderWindow* pWindow);
   void update(float fDeltaTime);
 
 private:
-  void updateStateMachine();
-  void updateIdleState();
-  void updateMovingState();
+  void updateStateMachine(float fDeltaTime);
+  void updateIdleState(float fDeltaTime);
+  void updateMovingState(float fDeltaTime);
 
   float m_fNoInputTime;
+  float m_fSpeed;
+  elm::vector<bool> m_vFacingDirections;
   FacingDirection m_eFacingDirection;
   State m_eState;
   Animation* m_pCurrentAnimation;
@@ -50,6 +54,7 @@ private:
   Animation m_cWalkDownAnimation;
   Animation m_cWalkRightAnimation;
   Chrono m_cChrono;
+  Vector2D m_cVelocity;
   sf::Sprite m_cSprite;
   sf::Texture m_cSpriteSheetTexture;
   bool m_bStopped;

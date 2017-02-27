@@ -8,7 +8,7 @@ typedef unsigned char byte;
 
 namespace Utils
 {
-void flipTexture(sf::Texture *pOriginalTexture, sf::Texture *pOutputTexture)
+static void flipTexture(sf::Texture *pOriginalTexture, sf::Texture *pOutputTexture)
 {
   // manually flip left texture
   sf::Vector2u cTextureSize = pOriginalTexture->getSize();

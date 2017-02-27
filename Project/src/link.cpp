@@ -18,6 +18,12 @@ Link::Link() : m_cStandingUpAnimation(&m_cSprite, 0.15f, false),
   m_cWalkRightAnimation(&m_cSprite, 0.07f, true)
 {
   m_fNoInputTime = 0.0f;
+  m_fSpeed = 0.8f;  // pixels/s ??
+  m_vFacingDirections.reserve(4);
+  m_vFacingDirections.pushBack(false);  // facing up
+  m_vFacingDirections.pushBack(false);  // facing left
+  m_vFacingDirections.pushBack(true);  // facing down
+  m_vFacingDirections.pushBack(false);  // facing right
   m_eFacingDirection = FacingDirection::Down;
   m_eState = State::Idle;
   m_pCurrentAnimation = nullptr;
@@ -399,7 +405,7 @@ Link::Link() : m_cStandingUpAnimation(&m_cSprite, 0.15f, false),
 
   //m_cSprite.setTexture(m_cLinkDownTexture);
   m_cSprite.setPosition(100.0f, 85.0f);
-  m_cSprite.setScale(10.0f, 10.0f);
+  //m_cSprite.setScale(10.0f, 10.0f);
 }
 
 Link::~Link()
@@ -412,51 +418,89 @@ sf::Sprite* Link::getSprite()
   return &m_cSprite;
 }
 
-void Link::processInput(const sf::Keyboard::Key &eKey)
+void Link::processInput(/*const sf::Keyboard::Key &eKey*/sf::RenderWindow* pWindow)
 {
   m_bHadInput = true;
   m_bStopped = false;
 
-  if (eKey == sf::Keyboard::Key::Up)
+  sf::Keyboard::Key eKey = sf::Keyboard::Key::Unknown;
+
+  if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up))
   {
-    m_eFacingDirection = Up;
-    //m_pCurrentAnimation = &m_cStandingUpAnimation;
-    /*if (m_pCurrentAnimation != &m_cWalkUpAnimation)
-    {
-      m_pCurrentAnimation = &m_cWalkUpAnimation;
-      m_pCurrentAnimation->play();
-    }*/
-  } else if (eKey == sf::Keyboard::Key::Left)
+    eKey = sf::Keyboard::Key::Up;
+    m_vFacingDirections[0] = true;
+  } else
   {
-    m_eFacingDirection = Left;
-    //m_pCurrentAnimation = &m_cStandingLeftAnimation;
-    /*if (m_pCurrentAnimation != &m_cWalkLeftAnimation)
-    {
-      m_pCurrentAnimation = &m_cWalkLeftAnimation;
-      m_pCurrentAnimation->play();
-    }*/
-  } else if (eKey == sf::Keyboard::Key::Down)
+    m_vFacingDirections[0] = false;
+  }
+  if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left))
   {
-    m_eFacingDirection = Down;
-    /*if (m_pCurrentAnimation != &m_cWalkDownAnimation)
-    {
-      m_pCurrentAnimation = &m_cWalkDownAnimation;
-      m_pCurrentAnimation->play();
-    }*/
-  } else if (eKey == sf::Keyboard::Key::Right)
+    eKey = sf::Keyboard::Key::Left;
+    m_vFacingDirections[1] = true;
+  } else
   {
-    m_eFacingDirection = Right;
-    //m_pCurrentAnimation = &m_cStandingRightAnimation;
-    /*if (m_pCurrentAnimation != &m_cWalkRightAnimation)
-    {
-      m_pCurrentAnimation = &m_cWalkRightAnimation;
-      m_pCurrentAnimation->play();
-    }*/
-  } else if (eKey == sf::Keyboard::Key::Unknown)
+    m_vFacingDirections[1] = false;
+  }
+  if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down))
+  {
+    eKey = sf::Keyboard::Key::Down;
+    m_vFacingDirections[2] = true;
+  } else
+  {
+    m_vFacingDirections[2] = false;
+  }
+  if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right))
+  {
+    eKey = sf::Keyboard::Key::Right;
+    m_vFacingDirections[3] = true;
+  } else
+  {
+    m_vFacingDirections[3] = false;
+  }
+
+  if (eKey == sf::Keyboard::Key::Unknown)
   {
     m_bHadInput = false;
     m_bStopped = true;
   }
+
+  //if (eKey == sf::Keyboard::Key::Up)
+  //{
+  //  m_eFacingDirection = Up;
+  //  m_vFacingDirections[0] = true;
+  //}/* else
+  //{
+  //  m_vFacingDirections[0] = false;
+  //}*/
+  //if (eKey == sf::Keyboard::Key::Left)
+  //{
+  //  m_eFacingDirection = Left;
+  //  m_vFacingDirections[1] = true;
+  //}/* else
+  //{
+  //  m_vFacingDirections[1] = false;
+  //}*/
+  //if (eKey == sf::Keyboard::Key::Down)
+  //{
+  //  m_eFacingDirection = Down;
+  //  m_vFacingDirections[2] = true;
+  //}/* else
+  //{
+  //  m_vFacingDirections[2] = false;
+  //}*/
+  //if (eKey == sf::Keyboard::Key::Right)
+  //{
+  //  m_eFacingDirection = Right;
+  //  m_vFacingDirections[3] = true;
+  //}/* else
+  //{
+  //  m_vFacingDirections[3] = false;
+  //}*/
+  //if (eKey == sf::Keyboard::Key::Unknown)
+  //{
+  //  m_bHadInput = false;
+  //  m_bStopped = true;
+  //}
 
   if (m_bHadInput == false)
   {
@@ -464,14 +508,20 @@ void Link::processInput(const sf::Keyboard::Key &eKey)
     static float sfCurrentTime = m_fNoInputTime;
     m_fNoInputTime += m_cChrono.timeAsSeconds() - sfCurrentTime;
     m_cChrono.start();
+
+    /*m_cVelocity.x = 0.0f;
+    m_cVelocity.y = 0.0f;*/
   } else // if it was useful input, reset the chrono
   {
     m_cChrono.start();
     m_fNoInputTime = 0.0;
+
+    m_cVelocity.x = 0.0f;
+    m_cVelocity.y = 0.0f;
   }
 }
 
-void Link::updateStateMachine()
+void Link::updateStateMachine(float fDeltaTime)
 {
   switch (m_eState)
   {
@@ -482,7 +532,7 @@ void Link::updateStateMachine()
       m_eState = Moving;
     } else
     {
-      updateIdleState();
+      updateIdleState(fDeltaTime);
     }
   }
   case Moving:
@@ -492,13 +542,13 @@ void Link::updateStateMachine()
       m_eState = Idle;
     } else
     {
-      updateMovingState();
+      updateMovingState(fDeltaTime);
     }
   }
   }
 }
 
-void Link::updateIdleState()
+void Link::updateIdleState(float fDeltaTime)
 {
   bool bPlayIdleAnimation = false;
   bool bChangedAnimation = false;
@@ -583,48 +633,47 @@ void Link::updateIdleState()
     pLastAnimation->stop();
     m_pCurrentAnimation->play();
   }
+
+  /*m_cVelocity.x = 0.0f;
+  m_cVelocity.y = 0.0f;*/
 }
 
-void Link::updateMovingState()
+void Link::updateMovingState(float fDeltaTime)
 {
   bool bChangedAnimation = false;
   Animation* pLastAnimation = nullptr;
+  uint32 uDirectionCount = 0;
+  float fVelocityMult = 1.0f;
 
-  switch (m_eFacingDirection)
-  {
-  case Up:
+  // Prior to this there was a switch() instead of ifs()
+
+  if (m_vFacingDirections[0] == true)
   {
     if (m_bStopped == false)
     {
-      if (m_pCurrentAnimation != &m_cWalkUpAnimation)
+      if (bChangedAnimation == false && m_pCurrentAnimation != &m_cWalkUpAnimation && uDirectionCount == 0)
       {
         pLastAnimation = m_pCurrentAnimation;
         m_pCurrentAnimation = &m_cWalkUpAnimation;
         bChangedAnimation = true;
       }
     }
-
-    break;
-  }
-  case Left:
-  {
-    if (m_bStopped == false)
+    
+    if (uDirectionCount > 0)
     {
-      if (m_pCurrentAnimation != &m_cWalkLeftAnimation)
-      {
-        pLastAnimation = m_pCurrentAnimation;
-        m_pCurrentAnimation = &m_cWalkLeftAnimation;
-        bChangedAnimation = true;
-      }
+      fVelocityMult = 0.5f;
     }
 
-    break;
+    //m_cVelocity.x = 0.0f;
+    m_cVelocity.y = -1.0f * fVelocityMult;
+    uDirectionCount++;
   }
-  case Down:
+  
+  if (m_vFacingDirections[2] == true) // order changed to maintain animation priority when moving
   {
     if (m_bStopped == false)
     {
-      if (m_pCurrentAnimation != &m_cWalkDownAnimation)
+      if (bChangedAnimation == false && m_pCurrentAnimation != &m_cWalkDownAnimation && uDirectionCount == 0)
       {
         pLastAnimation = m_pCurrentAnimation;
         m_pCurrentAnimation = &m_cWalkDownAnimation;
@@ -632,13 +681,43 @@ void Link::updateMovingState()
       }
     }
 
-    break;
+    if (uDirectionCount > 0)
+    {
+      fVelocityMult = 0.5f;
+    }
+
+    //m_cVelocity.x = 0.0f;
+    m_cVelocity.y = 1.0f * fVelocityMult;
+    uDirectionCount++;
   }
-  case Right:
+  
+  if (m_vFacingDirections[1] == true)
   {
     if (m_bStopped == false)
     {
-      if (m_pCurrentAnimation != &m_cWalkRightAnimation)
+      if (bChangedAnimation == false && m_pCurrentAnimation != &m_cWalkLeftAnimation && uDirectionCount == 0)
+      {
+        pLastAnimation = m_pCurrentAnimation;
+        m_pCurrentAnimation = &m_cWalkLeftAnimation;
+        bChangedAnimation = true;
+      }
+    }
+
+    if (uDirectionCount > 0)
+    {
+      fVelocityMult = 0.5f;
+    }
+
+    m_cVelocity.x = -1.0f * fVelocityMult;
+    //m_cVelocity.y = 0.0f;
+    uDirectionCount++;
+  }
+
+  if (m_vFacingDirections[3] == true)
+  {
+    if (m_bStopped == false)
+    {
+      if (bChangedAnimation == false && m_pCurrentAnimation != &m_cWalkRightAnimation && uDirectionCount == 0)
       {
         pLastAnimation = m_pCurrentAnimation;
         m_pCurrentAnimation = &m_cWalkRightAnimation;
@@ -646,20 +725,30 @@ void Link::updateMovingState()
       }
     }
 
-    break;
+    if (uDirectionCount > 0)
+    {
+      fVelocityMult = 0.5f;
+    }
+
+    m_cVelocity.x = 1.0f * fVelocityMult;
+    //m_cVelocity.y = 0.0f;
+    uDirectionCount++;
   }
-  } // switch()
 
   if (bChangedAnimation == true)
   {
     pLastAnimation->stop();
     m_pCurrentAnimation->play();
   }
+
+  sf::Vector2f cPosition = m_cSprite.getPosition();
+  m_cSprite.setPosition(cPosition.x + m_cVelocity.x * m_fSpeed * fDeltaTime, 
+    cPosition.y + m_cVelocity.y * m_fSpeed * fDeltaTime);
 }
 
 void Link::update(float fDeltaTime)
 {
-  updateStateMachine();
+  updateStateMachine(fDeltaTime);
 
   m_pCurrentAnimation->update(fDeltaTime);
 }

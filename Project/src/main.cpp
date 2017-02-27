@@ -50,7 +50,7 @@ int main()
     {
       cWindow.close();
     }
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up))
+    /*if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up))
     {
       eKey = sf::Keyboard::Key::Up;
     }
@@ -65,7 +65,7 @@ int main()
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right))
     {
       eKey = sf::Keyboard::Key::Right;
-    }
+    }*/
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D))
     {
       if (sViewPos.x + cView.getSize().x < cLevel.getWidth())
@@ -76,11 +76,11 @@ int main()
       }
     }
 
-    cLink.processInput(eKey);
+    cLink.processInput(&cWindow);
     // [INPUT]
 
     // [UPDATE]
-    cLink.update(0.16f);
+    cLink.update(0.016f);
     // [UPDATE]
 
     // [DRAW]
