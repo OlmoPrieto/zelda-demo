@@ -750,18 +750,42 @@ void Link::updateMovingState(float fDeltaTime)
   sf::Vector2f cPosition = m_cSprite.getPosition();
   m_cSprite.setPosition(cPosition.x + m_cVelocity.x * m_fSpeed * fDeltaTime, 
     cPosition.y + m_cVelocity.y * m_fSpeed * fDeltaTime);
-   
-  if ((uint32)(m_cSprite.getPosition().x) >= (m_uWindowWidth / 2))
-  { 
-    // TODO: add half the width to the position above
-    //m_cSprite.setPosition(cPosition);
-    m_pCurrentLevel->m_cView.move(m_cVelocity.x * m_fSpeed * fDeltaTime, 0.0f);
+  
+  //-----------------------------------------------------------
+  if ((uint32)(m_cSprite.getPosition().x) > 0 && (uint32)(m_cSprite.getPosition().x) < m_pCurrentLevel->getWidth())
+  {
+    // between 0 and width can move horizontally
+    float fAmountToMove = m_cVelocity.x * m_fSpeed * fDeltaTime;
+    m_pCurrentLevel->m_cViewPos.x += fAmountToMove;
+    if (m_pCurrentLevel->m_cViewPos.x <= m_pCurrentLevel->getWidth())
+    {
+      if ((uint32)(m_cSprite.getPosition().x) >= (m_uWindowWidth / 2))
+      { 
+        // TODO: add half the width to the position above
+        m_pCurrentLevel->m_cView.move(fAmountToMove, 0.0f);
+      }
+    }
+  } else  // gone outside bounds, reset to the pos before the movement
+  {
+    m_cSprite.setPosition(cPosition);
   }
-  if ((uint32)(m_cSprite.getPosition().y) >= (m_uWindowHeight / 2))
-  { 
-    // TODO: add half the height to the position above
-    //m_cSprite.setPosition(cPosition);
-    m_pCurrentLevel->m_cView.move(0.0f, m_cVelocity.y * m_fSpeed * fDeltaTime);
+  
+  if ((uint32)(m_cSprite.getPosition().y) > 0 && (uint32)(m_cSprite.getPosition().y) < m_pCurrentLevel->getHeight())
+  {
+    // between 0 and height can move vertically
+    float fAmountToMove = m_cVelocity.y * m_fSpeed * fDeltaTime;
+    m_pCurrentLevel->m_cViewPos.y += fAmountToMove;
+    if (m_pCurrentLevel->m_cViewPos.y <= m_pCurrentLevel->getHeight())
+    {
+      if ((uint32)(m_cSprite.getPosition().y) >= (m_uWindowHeight / 2))
+      { 
+        // TODO: add half the height to the position above
+        m_pCurrentLevel->m_cView.move(0.0f, fAmountToMove);
+      }
+    }
+  } else
+  {
+    m_cSprite.setPosition(cPosition);
   }
 }
 
@@ -775,13 +799,15 @@ void Link::update(float fDeltaTime)
 void Link::setLevel(Level* pCurrentLevel)
 {
   m_pCurrentLevel = pCurrentLevel;
-  m_pCurrentLevel->m_cViewPos.x = 100.0f;
-  m_pCurrentLevel->m_cViewPos.y = 80.0f;
+  m_pCurrentLevel->m_cViewPos.x -= m_cSprite.getPosition().x;
+  m_pCurrentLevel->m_cViewPos.y -= m_cSprite.getPosition().y;
+  //m_pCurrentLevel->m_cViewPos.x = 100.0f;
+  //m_pCurrentLevel->m_cViewPos.y = 80.0f;
 }
 
 void Link::setWindowParameters(sf::RenderWindow* pWindow)
 {
-  // TODO: that "magic number" is the zoom to the view. Do it right
+  // TODO: that "magic number" is the zoom applied to the view. Do it right whenever possible
   m_uWindowWidth = pWindow->getSize().x * 0.5f;
   m_uWindowHeight = pWindow->getSize().y * 0.5f;
 }

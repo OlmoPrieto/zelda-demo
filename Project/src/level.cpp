@@ -16,10 +16,13 @@ Level::Level()
   loadGridFile("resources/grid1.gr");
 
   m_pWindowRef = nullptr;
-  // TODO: healty harcode here for window size
+  // TODO: healty harcode here for window's parameters
   m_cView.reset(sf::FloatRect(0.0f, 0.0f, 800.0f, 600.0f));
   m_cView.zoom(0.5f);
   m_cView.move(-(800.0f * 0.25f), -(600.0f * 0.25f));
+
+  m_cViewPos.x = 800.0f * 0.25f * 2.0f;
+  m_cViewPos.y = 600.0f * 0.25f * 2.0f;
 
   m_cMapSprite.setTexture(m_cMapTexture);
   m_cMapSprite.setPosition(0.0f, 0.0f);
