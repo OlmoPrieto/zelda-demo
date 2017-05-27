@@ -750,6 +750,12 @@ void Link::updateMovingState(float fDeltaTime)
   sf::Vector2f cPosition = m_cSprite.getPosition();
   m_cSprite.setPosition(cPosition.x + m_cVelocity.x * m_fSpeed * fDeltaTime, 
     cPosition.y + m_cVelocity.y * m_fSpeed * fDeltaTime);
+    
+  uint32 uHalfSpriteWidth = m_pCurrentAnimation->getCurrentFrame()->width / 2;
+  uint32 uHalfSpriteHeight = m_pCurrentAnimation->getCurrentFrame()->height / 2;  
+    
+  if (m_pCurrentLevel->getTileValue(m_cSprite.getPosition().x + uHalfSpriteWidth, m_cSprite.getPosition().y + uHalfSpriteHeight) != 1)
+  {
   
   //-----------------------------------------------------------
   if ((uint32)(m_cSprite.getPosition().x) > 0 && (uint32)(m_cSprite.getPosition().x) < m_pCurrentLevel->getWidth())
@@ -784,6 +790,12 @@ void Link::updateMovingState(float fDeltaTime)
       }
     }
   } else
+  {
+    m_cSprite.setPosition(cPosition);
+  }
+  
+  } // if tile is == 0
+  else
   {
     m_cSprite.setPosition(cPosition);
   }

@@ -90,5 +90,7 @@ void Level::setWindowRef(sf::RenderWindow* pWindow)
 
 byte Level::getTileValue(uint32 uX, uint32 uY) const
 {
+  uX /= m_uTileSize;
+  uY /= m_uTileSize;
   return m_cGridMatrix.getData(uX, uY);
 }
